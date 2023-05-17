@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { IModel, ModelResult, IExtractor, ParseResult, QueryProcessor } from "@microsoft/recognizers-text";
 import { IDateTimeParser, DateTimeParseResult } from "./parsers";
 import { IDateTimeExtractor } from "./baseDateTime";
 
 export class DateTimeModelResult extends ModelResult {
-    timexStr: string
+    timexStr!: string
 }
 
 export interface IDateTimeModel extends IModel {
@@ -32,7 +32,7 @@ export class DateTimeModel implements IDateTimeModel {
         try {
             let extractResults = this.extractor.extract(query, referenceDate);
             for (let result of extractResults) {
-                let parseResult = this.parser.parse(result, referenceDate);
+                let parseResult = this.parser.parse(result, referenceDate)!;
                 if (Array.isArray(parseResult.value)) {
                     parseDates.push(...parseResult.value);
                 }

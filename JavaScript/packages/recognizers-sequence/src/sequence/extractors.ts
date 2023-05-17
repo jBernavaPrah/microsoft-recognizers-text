@@ -1,33 +1,33 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IExtractor, ExtractResult, RegExpUtility, Match, StringUtility } from "@microsoft/recognizers-text";
-import { BasePhoneNumbers } from "../resources/basePhoneNumbers";
-import { BaseIp } from "../resources/baseIp";
-import { BaseMention } from "../resources/baseMention";
-import { BaseHashtag } from "../resources/baseHashtag";
-import { BaseEmail } from "../resources/baseEmail";
-import { BaseURL } from "../resources/baseURL";
-import { BaseGUID } from "../resources/baseGUID";
-import { Constants } from "./constants";
+import { IExtractor, ExtractResult, RegExpUtility, Match, StringUtility } from '@microsoft/recognizers-text';
+import { BasePhoneNumbers } from '../resources/basePhoneNumbers';
+import { BaseIp } from '../resources/baseIp';
+import { BaseMention } from '../resources/baseMention';
+import { BaseHashtag } from '../resources/baseHashtag';
+import { BaseEmail } from '../resources/baseEmail';
+import { BaseURL } from '../resources/baseURL';
+import { BaseGUID } from '../resources/baseGUID';
+import { Constants } from './constants';
 
 export abstract class BaseSequenceExtractor implements IExtractor {
     abstract regexes: Map<RegExp, string>;
 
-    protected extractType: string;
+    protected extractType!: string;
 
     extract(source: string): ExtractResult[] {
-        let results = new Array<ExtractResult>();
+        const results = new Array<ExtractResult>();
 
         if (StringUtility.isNullOrWhitespace(source)) {
             return results;
         }
 
-        let matchSource = new Map<Match, string>();
-        let matched = new Array<boolean>(source.length);
+        const matchSource = new Map<Match, string>();
+        const matched = new Array<boolean>(source.length);
 
         // Traverse every match results to see each position in the text is matched or not.
-        let collections = this.regexes.forEach((typeExtracted, regex) => {
+        const collections = this.regexes.forEach((typeExtracted, regex) => {
             RegExpUtility.getMatches(regex, source).forEach(match => {
                 if (!this.isValidMatch(match)) {
                     return;
@@ -47,19 +47,19 @@ export abstract class BaseSequenceExtractor implements IExtractor {
         for (let i = 0; i < source.length; i++) {
             if (matched[i]) {
                 if (i + 1 === source.length || !matched[i + 1]) {
-                    let start = lastNotMatched + 1;
-                    let length = i - lastNotMatched;
-                    let substr = source.substr(start, length);
-                    let matchFunc = (o: Match) => o.index == start && o.length == length;
+                    const start = lastNotMatched + 1;
+                    const length = i - lastNotMatched;
+                    const substr = source.substr(start, length);
+                    const matchFunc = (o: Match) => o.index == start && o.length == length;
 
-                    let srcMatch = Array.from(matchSource.keys()).find(matchFunc);
+                    const srcMatch = Array.from(matchSource.keys()).find(matchFunc);
                     if (srcMatch) {
                         results.push({
                             start: start,
                             length: length,
                             text: substr,
                             type: this.extractType,
-                            data: matchSource.has(srcMatch) ? matchSource.get(srcMatch) : null
+                            data: matchSource.has(srcMatch) ? matchSource.get(srcMatch) : null,
                         });
                     }
                 }
@@ -82,7 +82,7 @@ export interface IPhoneNumberExtractorConfiguration {
     NonWordBoundariesRegex: string;
     EndWordBoundariesRegex: string;
     ColonPrefixCheckRegex: string;
-    FalsePositivePrefixRegex: string;
+    FalsePositivePrefixRegex: string | null;
     ForbiddenPrefixMarkers: string[];
 }
 
@@ -92,7 +92,7 @@ export class BasePhoneNumberExtractorConfiguration implements IPhoneNumberExtrac
     readonly EndWordBoundariesRegex: string;
     readonly ColonPrefixCheckRegex: string;
     readonly ForbiddenPrefixMarkers: string[];
-    readonly FalsePositivePrefixRegex: string;
+    readonly FalsePositivePrefixRegex: string | null;
 
     constructor() {
         this.WordBoundariesRegex = BasePhoneNumbers.WordBoundariesRegex;
@@ -111,9 +111,9 @@ export class BasePhoneNumberExtractor extends BaseSequenceExtractor {
     constructor(config: IPhoneNumberExtractorConfiguration) {
         super();
         this.config = config;
-        let wordBoundariesRegex = config.WordBoundariesRegex;
-        let nonWordBoundariesRegex = config.NonWordBoundariesRegex;
-        let endWordBoundariesRegex = config.EndWordBoundariesRegex;
+        const wordBoundariesRegex = config.WordBoundariesRegex;
+        const nonWordBoundariesRegex = config.NonWordBoundariesRegex;
+        const endWordBoundariesRegex = config.EndWordBoundariesRegex;
         this.regexes = new Map<RegExp, string>()
             .set(RegExpUtility.getSafeRegExp(BasePhoneNumbers.BRPhoneNumberRegex(wordBoundariesRegex, nonWordBoundariesRegex, endWordBoundariesRegex)), Constants.PHONE_NUMBER_REGEX_BR)
             .set(RegExpUtility.getSafeRegExp(BasePhoneNumbers.GeneralPhoneNumberRegex(wordBoundariesRegex, endWordBoundariesRegex)), Constants.PHONE_NUMBER_REGEX_GENERAL)
@@ -126,33 +126,34 @@ export class BasePhoneNumberExtractor extends BaseSequenceExtractor {
             .set(RegExpUtility.getSafeRegExp(BasePhoneNumbers.NLPhoneNumberRegex(wordBoundariesRegex, endWordBoundariesRegex)), Constants.PHONE_NUMBER_REGEX_NL)
             .set(RegExpUtility.getSafeRegExp(BasePhoneNumbers.SpecialPhoneNumberRegex(wordBoundariesRegex, endWordBoundariesRegex)), Constants.PHONE_NUMBER_REGEX_SPECIAL);
     }
+
     extract(source: string): ExtractResult[] {
-        let ret = new Array<ExtractResult>();
+        const ret = new Array<ExtractResult>();
         if (!source.match(BasePhoneNumbers.PreCheckPhoneNumberRegex)) {
             return ret;
         }
-        let ers = super.extract(source);
-        let formatIndicatorRegex = new RegExp(BasePhoneNumbers.FormatIndicatorRegex, "ig");
-        let digitRegex = new RegExp("[0-9]");
-        for (let er of ers) {
+        const ers = super.extract(source);
+        const formatIndicatorRegex = new RegExp(BasePhoneNumbers.FormatIndicatorRegex, 'ig');
+        const digitRegex = new RegExp('[0-9]');
+        for (const er of ers) {
             let Digits = 0;
-            for (let t of er.text) {
+            for (const t of er.text) {
                 if (t.match(digitRegex)) {
-                    Digits++ ; 
+                    Digits++;
                 }
             }
-            if ((Digits < 7 && er.data !== "ITPhoneNumber") || er.text.match(BasePhoneNumbers.SSNFilterRegex)) {
+            if ((Digits < 7 && er.data !== 'ITPhoneNumber') || er.text.match(BasePhoneNumbers.SSNFilterRegex)) {
                 continue;
             }
-            if (Digits === 16 && !(er.text.substring(0, 1) === "+")) {
+            if (Digits === 16 && !(er.text.substring(0, 1) === '+')) {
                 continue;
             }
             if (Digits === 15) {
                 let flag = false;
-                let numSpans = er.text.split(" ");
-                for (let numSpan of numSpans) {
+                const numSpans = er.text.split(' ');
+                for (const numSpan of numSpans) {
                     let numSpanDigit = 0;
-                    for (let t of numSpan) {
+                    for (const t of numSpan) {
                         if (t.match(digitRegex)) {
                             numSpanDigit++;
                         }
@@ -170,13 +171,13 @@ export class BasePhoneNumberExtractor extends BaseSequenceExtractor {
                 }
             }
             if (er.start + er.length < source.length) {
-                let ch = source[ er.start+er.length ];
-                if (BasePhoneNumbers.ForbiddenSuffixMarkers.indexOf(ch) !== -1){
+                const ch = source[er.start + er.length];
+                if (BasePhoneNumbers.ForbiddenSuffixMarkers.indexOf(ch) !== -1) {
                     continue;
                 }
             }
-            let ch = source[er.start - 1];
-            let front = source.substring(0, er.start - 1);
+            const ch = source[er.start - 1];
+            const front = source.substring(0, er.start - 1);
             if (this.config.FalsePositivePrefixRegex && front.match(this.config.FalsePositivePrefixRegex)) {
                 continue;
             }
@@ -186,11 +187,11 @@ export class BasePhoneNumberExtractor extends BaseSequenceExtractor {
                     if (BasePhoneNumbers.SpecialBoundaryMarkers.indexOf(ch) !== -1 &&
                         formatIndicatorRegex.test(er.text) &&
                         er.start >= 2) {
-                        let chGap = source[er.start - 2];
+                        const chGap = source[er.start - 2];
                         if (chGap.match(digitRegex)) {
-                            let match = front.match(BasePhoneNumbers.InternationDialingPrefixRegex);
+                            const match = front.match(BasePhoneNumbers.InternationDialingPrefixRegex);
                             if (match) {
-                                let moveOffset = match[0].length + 1;
+                                const moveOffset = match[0].length + 1;
                                 er.start = er.start - moveOffset;
                                 er.length = er.length + moveOffset;
                                 er.text = source.substring(er.start, er.start + er.length);
@@ -224,7 +225,7 @@ export class BasePhoneNumberExtractor extends BaseSequenceExtractor {
         }
 
         // filter hexadecimal address like 00 10 00 31 46 D9 E9 11
-        let maskRegex = new RegExp(BasePhoneNumbers.PhoneNumberMaskRegex, "g");
+        const maskRegex = new RegExp(BasePhoneNumbers.PhoneNumberMaskRegex, 'g');
         let m: RegExpExecArray | null;
         while (true) {
             m = maskRegex.exec(source);
@@ -257,16 +258,16 @@ export class BaseIpExtractor extends BaseSequenceExtractor {
     }
 
     extract(source: string): ExtractResult[] {
-        let results = new Array<ExtractResult>();
+        const results = new Array<ExtractResult>();
 
         if (StringUtility.isNullOrWhitespace(source)) {
             return results;
         }
 
-        let matchSource = new Map<Match, string>();
-        let matched = new Array<boolean>(source.length);
+        const matchSource = new Map<Match, string>();
+        const matched = new Array<boolean>(source.length);
 
-        let collections = this.regexes.forEach((typeExtracted, regex) => {
+        const collections = this.regexes.forEach((typeExtracted, regex) => {
             RegExpUtility.getMatches(regex, source).forEach(match => {
                 for (let j = 0; j < match.length; j++) {
                     matched[match.index + j] = true;
@@ -281,9 +282,9 @@ export class BaseIpExtractor extends BaseSequenceExtractor {
         for (let i = 0; i < source.length; i++) {
             if (matched[i]) {
                 if (i + 1 === source.length || !matched[i + 1]) {
-                    let start = lastNotMatched + 1;
-                    let length = i - lastNotMatched;
-                    let substr = source.substr(start, length);
+                    const start = lastNotMatched + 1;
+                    const length = i - lastNotMatched;
+                    const substr = source.substr(start, length);
                     if (substr.startsWith(Constants.IPV6_ELLIPSIS) && start > 0 && this.isLetterOrDigit(source[start - 1])) {
                         continue;
                     }
@@ -291,16 +292,16 @@ export class BaseIpExtractor extends BaseSequenceExtractor {
                         continue;
                     }
 
-                    let matchFunc = (o: Match) => o.index === start && o.length === length;
+                    const matchFunc = (o: Match) => o.index === start && o.length === length;
 
-                    let srcMatch = Array.from(matchSource.keys()).find(matchFunc);
+                    const srcMatch = Array.from(matchSource.keys()).find(matchFunc);
                     if (srcMatch) {
                         results.push({
                             start: start,
                             length: length,
                             text: substr,
                             type: this.extractType,
-                            data: matchSource.has(srcMatch) ? matchSource.get(srcMatch) : null
+                            data: matchSource.has(srcMatch) ? matchSource.get(srcMatch) : null,
                         });
                     }
                 }
@@ -314,7 +315,7 @@ export class BaseIpExtractor extends BaseSequenceExtractor {
     }
 
     isLetterOrDigit(c: string): boolean {
-        return new RegExp("[0-9a-zA-z]").test(c);
+        return new RegExp('[0-9a-zA-z]').test(c);
     }
 }
 

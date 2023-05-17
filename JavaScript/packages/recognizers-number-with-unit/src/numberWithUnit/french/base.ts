@@ -1,13 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ExtractResult, IExtractor, IParser, RegExpUtility } from "@microsoft/recognizers-text";
-import { Culture, CultureInfo, NumberMode, AgnosticNumberParserFactory, AgnosticNumberParserType, FrenchNumberExtractor, FrenchNumberParserConfiguration } from "@microsoft/recognizers-text-number";
-import { Constants } from "../constants";
-import { INumberWithUnitExtractorConfiguration } from "../extractors";
-import { BaseNumberWithUnitParserConfiguration } from "../parsers";
-import { FrenchNumericWithUnit } from "../../resources/frenchNumericWithUnit";
-import { BaseUnits } from "../../resources/baseUnits";
+import { ExtractResult, IExtractor, IParser, RegExpUtility } from '@microsoft/recognizers-text';
+import {
+    Culture,
+    CultureInfo,
+    NumberMode,
+    AgnosticNumberParserFactory,
+    AgnosticNumberParserType,
+    FrenchNumberExtractor,
+    FrenchNumberParserConfiguration,
+} from '@microsoft/recognizers-text-number';
+import { Constants } from '../constants';
+import { INumberWithUnitExtractorConfiguration } from '../extractors';
+import { BaseNumberWithUnitParserConfiguration } from '../parsers';
+import { FrenchNumericWithUnit } from '../../resources/frenchNumericWithUnit';
+import { BaseUnits } from '../../resources/baseUnits';
 
 export abstract class FrenchNumberWithUnitExtractorConfiguration implements INumberWithUnitExtractorConfiguration {
     abstract readonly suffixList: ReadonlyMap<string, string>;
@@ -22,7 +30,7 @@ export abstract class FrenchNumberWithUnitExtractorConfiguration implements INum
     readonly connectorToken: string;
     readonly compoundUnitConnectorRegex: RegExp;
     readonly nonUnitRegex: RegExp;
-    readonly ambiguousUnitNumberMultiplierRegex: RegExp;
+    readonly ambiguousUnitNumberMultiplierRegex!: RegExp;
 
     constructor(ci: CultureInfo) {
         this.cultureInfo = ci;
@@ -42,9 +50,9 @@ export abstract class FrenchNumberWithUnitExtractorConfiguration implements INum
 export class FrenchNumberWithUnitParserConfiguration extends BaseNumberWithUnitParserConfiguration {
     readonly internalNumberParser: IParser;
     readonly internalNumberExtractor: IExtractor;
-    readonly connectorToken: string;
-    readonly currencyNameToIsoCodeMap: ReadonlyMap<string, string>;
-    readonly currencyFractionCodeList: ReadonlyMap<string, string>;
+    readonly connectorToken: string | null;
+    readonly currencyNameToIsoCodeMap!: ReadonlyMap<string, string>;
+    readonly currencyFractionCodeList!: ReadonlyMap<string, string>;
 
     constructor(ci: CultureInfo) {
         super(ci);

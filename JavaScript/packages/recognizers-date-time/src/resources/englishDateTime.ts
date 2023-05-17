@@ -62,7 +62,7 @@ export namespace EnglishDateTime {
     export const MonthRegex = `\\b${MonthRegexNoWordBoundary}`;
     export const WrittenMonthRegex = `(((the\\s+)?month of\\s+)?${MonthRegex})`;
     export const MonthSuffixRegex = `(?<msuf>(?:(in|of|on)\\s+)?(${RelativeMonthRegex}|${WrittenMonthRegex}))`;
-    export const DateUnitRegex = `(?<unit>(decade|year|(?<uoy>month|week)|(?<business>(business\\s+|week\\s*))?(?<uoy>day)|fortnight|weekend)(?<plural>s)?|(?<=(^|\\s)\\d{1,4})[ymwd])\\b`;
+    export const DateUnitRegex = `(?<unit>(decade|year|(?<uoy>month|week|fortnight)|(?<business>(business\\s+|week\\s*))?(?<uoy>day)|fortnight|weekend)(?<plural>s)?|(?<=(^|\\s)\\d{1,4})[ymwd])\\b`;
     export const DateTokenPrefix = `on `;
     export const TimeTokenPrefix = `at `;
     export const TokenBeforeDate = `on `;
@@ -77,7 +77,7 @@ export namespace EnglishDateTime {
     export const MonthFrontSimpleCasesRegex = `\\b(${RangePrefixRegex}\\s+)?${MonthSuffixRegex}\\s+((from)\\s+)?(${DayRegex}|${WrittenOrdinalDayRegex})\\s*${TillRegex}\\s*(${DayRegex}|${WrittenOrdinalDayRegex})((\\s+|\\s*,\\s*)${YearRegex})?\\b`;
     export const MonthFrontBetweenRegex = `\\b${MonthSuffixRegex}\\s+(between\\s+)(${DayRegex}|${WrittenOrdinalDayRegex})\\s*${RangeConnectorRegex}\\s*(${DayRegex}|${WrittenOrdinalDayRegex})((\\s+|\\s*,\\s*)${YearRegex})?\\b`;
     export const BetweenRegex = `\\b(between\\s+)(${DayRegex}|${WrittenOrdinalDayRegex})\\s*${RangeConnectorRegex}\\s*(${DayRegex}|${WrittenOrdinalDayRegex})\\s+${MonthSuffixRegex}((\\s+|\\s*,\\s*)${YearRegex})?\\b`;
-    export const MonthWithYear = `\\b(((${WrittenMonthRegex}[\\.]?|((the\\s+)?(?<cardinal>first|1st|second|2nd|third|3rd|fourth|4th|fifth|5th|sixth|6th|seventh|7th|eighth|8th|ninth|9th|tenth|10th|eleventh|11th|twelfth|12th|last)\\s+month(?=\\s+(of|in))))((\\s*)[/\\\\\\-\\.,]?(\\s+(of|in))?(\\s*)(${YearRegex}|(?<order>following|next|last|this)\\s+year)|\\s+(of|in)\\s+${TwoDigitYearRegex}))|((${YearRegex}|(?<order>following|next|last|this)\\s+year)(\\s*),?(\\s*)${WrittenMonthRegex}))\\b`;
+    export const MonthWithYear = `\\b(((${WrittenMonthRegex}[\\.]?|((the\\s+)?(?<cardinal>first|1st|second|2nd|third|3rd|fourth|4th|fifth|5th|sixth|6th|seventh|7th|eighth|8th|ninth|9th|tenth|10th|eleventh|11th|twelfth|12th|last)\\s+month(?=\\s+(of|in))))((\\s*)[/\\\\\\-\\.,]?(\\s+(of|in))?(\\s*)(${YearRegex}|${TwoDigitYearRegex}|(?<order>following|next|last|this)\\s+year)|\\s+(of|in)\\s+${TwoDigitYearRegex}))|((${YearRegex}|(?<order>following|next|last|this)\\s+year)(\\s*),?(\\s*)${WrittenMonthRegex}))\\b`;
     export const SpecialYearPrefixes = `(calendar|(?<special>fiscal|school))`;
     export const OneWordPeriodRegex = `\\b((((the\\s+)?month of\\s+)?(${StrictRelativeRegex}\\s+)?${MonthRegex})|(month|year) to date|(?<toDate>((un)?till?|to)\\s+date)|(${RelativeRegex}\\s+)?(my\\s+)?((?<business>working\\s+week|workweek)|week(end)?|month|fortnight|((${SpecialYearPrefixes}\\s+)?year))(?!((\\s+of)?\\s+\\d+(?!(${BaseDateTime.BaseAmDescRegex}|${BaseDateTime.BasePmDescRegex}))|\\s+to\\s+date))(\\s+${AfterNextSuffixRegex})?)\\b`;
     export const MonthNumWithYear = `\\b((${BaseDateTime.FourDigitYearRegex}(\\s*)[/\\-\\.](\\s*)${MonthNumRegex})|(${MonthNumRegex}(\\s*)[/\\-](\\s*)${BaseDateTime.FourDigitYearRegex}))\\b`;
@@ -222,7 +222,7 @@ export namespace EnglishDateTime {
     export const EachPrefixRegex = `\\b(?<each>(each|every|once an?)\\s*$)`;
     export const SetEachRegex = `\\b(?<each>(each|every)(?<other>\\s+(other|alternate))?\\s*)(?!the|that)\\b`;
     export const SetLastRegex = `(?<last>following|next|upcoming|this|${LastNegPrefix}last|past|previous|current)`;
-    export const EachDayRegex = `^\\s*(each|every)\\s*day\\b`;
+    export const EachDayRegex = `\\s*((each|every)\\s*day)|daily\\b`;
     export const DurationFollowedUnit = `(^\\s*${DurationUnitRegex}\\s+${SuffixAndRegex})|(^\\s*${SuffixAndRegex}?(\\s+|-)?${DurationUnitRegex})`;
     export const NumberCombinedWithDurationUnit = `\\b(?<num>\\d+(\\.\\d*)?)(-)?${DurationUnitRegex}`;
     export const AnUnitRegex = `(\\b((?<half>(half)\\s+)?an?|another)|(?<half>(1/2|½|half)))\\s+${DurationUnitRegex}`;
@@ -305,7 +305,7 @@ export namespace EnglishDateTime {
     export const TasksModeSupressionRegexes = `(${AmPmDescRegex}|${TasksModeSpecialDescRegex}|${TasksModeHolidayListSupression}|${DecadeRegex}|${DecadeWithCenturyRegex}|${QuarterRegex}|${QuarterRegexYearFront}|${AllHalfYearRegex}|${SeasonRegex})`;
     export const TasksModeNextPrefix = `(?<next>next\\s+)`;
     export const TasksModeDurationToDatePatterns = `\\b(${TasksModeNextPrefix}((?<week>week)|(?<month>month)|(?<year>year)))\\b`;
-    export const UnitMap: ReadonlyMap<string, string> = new Map<string, string>([["decades", "10Y"],["decade", "10Y"],["years", "Y"],["year", "Y"],["y", "Y"],["months", "MON"],["month", "MON"],["m", "M"],["quarters", "3MON"],["quarter", "3MON"],["semesters", "6MON"],["semestres", "6MON"],["semester", "6MON"],["semestre", "6MON"],["weeks", "W"],["week", "W"],["w", "W"],["weekends", "WE"],["weekend", "WE"],["fortnights", "2W"],["fortnight", "2W"],["weekdays", "D"],["weekday", "D"],["days", "D"],["day", "D"],["d", "D"],["nights", "D"],["night", "D"],["hours", "H"],["hour", "H"],["hrs", "H"],["hr", "H"],["h", "H"],["minutes", "M"],["minute", "M"],["mins", "M"],["min", "M"],["seconds", "S"],["second", "S"],["secs", "S"],["sec", "S"]]);
+    export const UnitMap: ReadonlyMap<string, string> = new Map<string, string>([["decades", "10Y"],["decade", "10Y"],["years", "Y"],["year", "Y"],["y", "Y"],["months", "MON"],["month", "MON"],["m", "M"],["quarters", "3MON"],["quarter", "3MON"],["semesters", "6MON"],["semestres", "6MON"],["semester", "6MON"],["semestre", "6MON"],["weeks", "W"],["week", "W"],["w", "W"],["weekends", "WE"],["weekend", "WE"],["fortnights", "2W"],["fortnight", "2W"],["weekdays", "WD"],["weekday", "WD"],["days", "D"],["day", "D"],["d", "D"],["nights", "D"],["night", "D"],["hours", "H"],["hour", "H"],["hrs", "H"],["hr", "H"],["h", "H"],["minutes", "M"],["minute", "M"],["mins", "M"],["min", "M"],["seconds", "S"],["second", "S"],["secs", "S"],["sec", "S"]]);
     export const UnitValueMap: ReadonlyMap<string, number> = new Map<string, number>([["decades", 315360000],["decade", 315360000],["years", 31536000],["year", 31536000],["y", 31536000],["months", 2592000],["month", 2592000],["m", 2592000],["fortnights", 1209600],["fortnight", 1209600],["weekends", 172800],["weekend", 172800],["weeks", 604800],["week", 604800],["w", 604800],["days", 86400],["day", 86400],["d", 86400],["nights", 86400],["night", 86400],["hours", 3600],["hour", 3600],["hrs", 3600],["hr", 3600],["h", 3600],["minutes", 60],["minute", 60],["mins", 60],["min", 60],["seconds", 1],["second", 1],["secs", 1],["sec", 1]]);
     export const SpecialYearPrefixesMap: ReadonlyMap<string, string> = new Map<string, string>([["fiscal", "FY"],["school", "SY"],["fy", "FY"],["sy", "SY"]]);
     export const SeasonMap: ReadonlyMap<string, string> = new Map<string, string>([["spring", "SP"],["summer", "SU"],["fall", "FA"],["autumn", "FA"],["winter", "WI"]]);
@@ -353,6 +353,8 @@ export namespace EnglishDateTime {
     export const DoubleMultiplierRegex = `^(bi)(-|\\s)?`;
     export const HalfMultiplierRegex = `^(semi)(-|\\s)?`;
     export const DayTypeRegex = `((week)?da(il)?ys?)$`;
+    export const WeekDayTypeRegex = `(weekday?)$`;
+    export const FortNightRegex = `(fortnight?)$`;
     export const WeekTypeRegex = `(week(s|ly)?)$`;
     export const WeekendTypeRegex = `(weekends?)$`;
     export const MonthTypeRegex = `(month(s|ly)?)$`;

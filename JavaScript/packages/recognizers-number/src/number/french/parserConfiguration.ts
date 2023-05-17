@@ -60,11 +60,11 @@ export class FrenchNumberParserConfiguration implements INumberParserConfigurati
 
     resolveCompositeNumber(numberStr: string): number {
         if (this.ordinalNumberMap.has(numberStr)) {
-            return this.ordinalNumberMap.get(numberStr);
+            return this.ordinalNumberMap.get(numberStr)!;
         }
 
         if (this.cardinalNumberMap.has(numberStr)) {
-            return this.cardinalNumberMap.get(numberStr);
+            return this.cardinalNumberMap.get(numberStr)!;
         }
 
         let value = 0;
@@ -73,9 +73,9 @@ export class FrenchNumberParserConfiguration implements INumberParserConfigurati
         let lastGoodChar = 0;
         for (let i = 0; i < numberStr.length; i++) {
             strBuilder = strBuilder.concat(numberStr[i]);
-            if (this.cardinalNumberMap.has(strBuilder) && this.cardinalNumberMap.get(strBuilder) > value) {
+            if (this.cardinalNumberMap.has(strBuilder) && this.cardinalNumberMap.get(strBuilder)! > value) {
                 lastGoodChar = i;
-                value = this.cardinalNumberMap.get(strBuilder);
+                value = this.cardinalNumberMap.get(strBuilder)!;
             }
 
             if ((i + 1) === numberStr.length) {

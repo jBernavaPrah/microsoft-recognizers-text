@@ -281,4 +281,5 @@ export namespace PortugueseDateTime {
     export const QuarterTypeRegex = `(trimestral(mente)?)$`;
     export const SemiAnnualTypeRegex = `(semestral(mente)?)$`;
     export const YearTypeRegex = `(anual(mente)?)$`;
+    export const ThisTerms = [ "esse","essa","este","esta" ];
 }

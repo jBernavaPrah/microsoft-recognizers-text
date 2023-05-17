@@ -1,27 +1,27 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Culture } from "./culture";
-import { match, cache } from "xregexp";
-import { StringUtility } from "./utilities";
+import {Culture} from "./culture";
+import {StringUtility} from "./utilities";
 
 export interface IModel {
     readonly modelTypeName: string
+
     parse(query: string): ModelResult[]
 }
 
 export class ModelResult {
-    text: string
-    start: number
-    end: number
-    typeName: string
-    resolution: { [key: string]: any }
+    text!: string
+    start!: number
+    end!: number
+    typeName!: string
+    resolution!: { [key: string]: any }
 }
 
 export class ExtendedModelResult extends ModelResult {
-    parentText: string
+    parentText!: string
 
-    constructor(source: ModelResult = null) {
+    constructor(source: ModelResult | null = null) {
         super();
         if (source) {
             this.text = source.text;
@@ -34,10 +34,11 @@ export class ExtendedModelResult extends ModelResult {
 }
 
 class ModelFactoryKey<TModelOptions> {
-    culture: string;
+    culture: string | null;
     modelType: string;
-    options: TModelOptions;
-    constructor(culture: string, modelType: string, options: TModelOptions = null) {
+    options: TModelOptions | null;
+
+    constructor(culture: string, modelType: string, options: TModelOptions | null = null) {
         this.culture = culture ? culture.toLowerCase() : null;
         this.modelType = modelType;
         this.options = options;
@@ -67,27 +68,30 @@ export class ModelFactory<TModelOptions> {
         }
 
         if (result.containsModel) {
-            return result.model;
+            return result.model!;
         }
 
         throw new Error(`Could not find Model with the specified configuration: ${culture},${modelTypeName}`);
     }
 
-    tryGetModel(modelTypeName: string, culture: string, options: TModelOptions): { containsModel: boolean; model?: IModel } {
+    tryGetModel(modelTypeName: string, culture: string, options: TModelOptions): {
+        containsModel: boolean;
+        model?: IModel
+    } {
         culture = Culture.mapToNearestLanguage(culture);
         let cacheResult = this.getModelFromCache(modelTypeName, culture, options);
         if (cacheResult) {
-            return { containsModel: true, model: cacheResult };
+            return {containsModel: true, model: cacheResult};
         }
 
         let key = this.generateKey(modelTypeName, culture);
         if (this.modelFactories.has(key)) {
-            let model = this.modelFactories.get(key)(options);
+            let model = this.modelFactories.get(key)!(options);
             this.registerModelInCache(modelTypeName, culture, options, model);
-            return { containsModel: true, model: model };
+            return {containsModel: true, model: model};
         }
 
-        return { containsModel: false };
+        return {containsModel: false};
     }
 
     registerModel(modelTypeName: string, culture: string, modelCreator: (options: TModelOptions) => IModel) {
@@ -103,7 +107,7 @@ export class ModelFactory<TModelOptions> {
         this.modelFactories.forEach((value, key) => {
             let modelFactoryKey = ModelFactoryKey.fromString<TModelOptions>(key);
             if (StringUtility.isNullOrEmpty(targetCulture) || modelFactoryKey.culture === targetCulture) {
-                this.tryGetModel(modelFactoryKey.modelType, modelFactoryKey.culture, modelFactoryKey.options);
+                this.tryGetModel(modelFactoryKey.modelType, (modelFactoryKey.culture as string), modelFactoryKey.options!);
             }
         });
     }
@@ -112,7 +116,7 @@ export class ModelFactory<TModelOptions> {
         return new ModelFactoryKey(culture, modelTypeName).toString();
     }
 
-    private getModelFromCache(modelTypeName: string, culture: string, options: TModelOptions): IModel {
+    private getModelFromCache(modelTypeName: string, culture: string, options: TModelOptions): IModel | undefined {
         let key = this.generateCacheKey(modelTypeName, culture, options);
         return ModelFactory.cache.get(key);
     }

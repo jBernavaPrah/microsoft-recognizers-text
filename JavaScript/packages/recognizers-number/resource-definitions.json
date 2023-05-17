@@ -62,6 +62,15 @@
                 "export namespace FrenchNumeric {"
             ],
             "footer": [ "}" ]
+        },
+        {
+            "input": [ "Italian", "Italian-Numbers" ],
+            "output": "italianNumeric",
+            "header": [
+                "import { BaseNumbers } from \"./baseNumbers\";",
+                "export namespace ItalianNumeric {"
+            ],
+            "footer": [ "}" ]
         }
     ]
 }

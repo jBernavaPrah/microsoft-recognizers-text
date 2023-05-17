@@ -22,8 +22,8 @@ export enum AgnosticNumberParserType {
 export class AgnosticNumberParserFactory {
     static getParser(type: AgnosticNumberParserType, languageConfiguration: INumberParserConfiguration): BaseNumberParser {
 
-        let isChinese = languageConfiguration.cultureInfo.code.toLowerCase() === Culture.Chinese;
-        let isJapanese = languageConfiguration.cultureInfo.code.toLowerCase() === Culture.Japanese;
+        const isChinese = languageConfiguration.cultureInfo.code.toLowerCase() === Culture.Chinese;
+        const isJapanese = languageConfiguration.cultureInfo.code.toLowerCase() === Culture.Japanese;
 
         let parser: BaseNumberParser;
 

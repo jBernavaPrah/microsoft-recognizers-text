@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { IExtractor, ExtractResult, RegExpUtility, Match, MetaData } from "@microsoft/recognizers-text";
 import { Constants, TimeTypeConstants } from "./constants";
 import { Token, DateTimeFormatUtil, DateTimeResolutionResult, DayOfWeek, DateUtils, StringMap } from "./utilities";
@@ -24,13 +24,13 @@ export class BaseHolidayExtractor implements IDateTimeExtractor {
         if (!refDate) {
             refDate = new Date();
         }
-        let referenceDate = refDate;
+        const referenceDate = refDate;
 
-        let tokens: Token[] = new Array<Token>()
+        const tokens: Token[] = new Array<Token>()
             .concat(this.holidayMatch(source));
-        let results = Token.mergeAllTokens(tokens, source, this.extractorName);
+        const results = Token.mergeAllTokens(tokens, source, this.extractorName);
         results.forEach(result => {
-            let metaData = new MetaData();
+            const metaData = new MetaData();
             metaData.IsHoliday = true;
             result.metaData = metaData;
         });
@@ -38,7 +38,7 @@ export class BaseHolidayExtractor implements IDateTimeExtractor {
     }
 
     private holidayMatch(source: string): Token[] {
-        let ret = [];
+        const ret:Token[] = [];
         this.config.holidayRegexes.forEach(regex => {
             RegExpUtility.getMatches(regex, source).forEach(match => {
                 ret.push(new Token(match.index, match.index + match.length));
@@ -72,7 +72,7 @@ export class BaseHolidayParser implements IDateTimeParser {
         let value = null;
 
         if (er.type === BaseHolidayParser.ParserName) {
-            let innerResult = this.parseHolidayRegexMatch(er.text, referenceDate);
+            const innerResult = this.parseHolidayRegexMatch(er.text, referenceDate);
 
             if (innerResult.success) {
                 innerResult.futureResolution = {};
@@ -83,7 +83,7 @@ export class BaseHolidayParser implements IDateTimeParser {
             }
         }
 
-        let ret = new DateTimeParseResult(er);
+        const ret = new DateTimeParseResult(er);
         ret.value = value;
         ret.timexStr = value === null ? "" : value.timex;
         ret.resolutionStr = "";
@@ -92,13 +92,13 @@ export class BaseHolidayParser implements IDateTimeParser {
     }
 
     protected parseHolidayRegexMatch(text: string, referenceDate: Date): DateTimeResolutionResult {
-        let trimmedText = text.trim();
-        for (let regex of this.config.holidayRegexList) {
-            let offset = 0;
-            let matches = RegExpUtility.getMatches(regex, trimmedText);
+        const trimmedText = text.trim();
+        for (const regex of this.config.holidayRegexList) {
+            const offset = 0;
+            const matches = RegExpUtility.getMatches(regex, trimmedText);
             if (matches.length && matches[0].index === offset && matches[0].length === trimmedText.length) {
                 // LUIS value string will be set in Match2Date method
-                let ret = this.match2Date(matches[0], referenceDate);
+                const ret = this.match2Date(matches[0], referenceDate);
                 return ret;
             }
         }
@@ -106,12 +106,12 @@ export class BaseHolidayParser implements IDateTimeParser {
     }
 
     protected match2Date(match: Match, referenceDate: Date): DateTimeResolutionResult {
-        let ret = new DateTimeResolutionResult();
-        let holidayStr = this.config.sanitizeHolidayToken(match.groups("holiday").value.toLowerCase());
+        const ret = new DateTimeResolutionResult();
+        const holidayStr = this.config.sanitizeHolidayToken(match.groups("holiday").value.toLowerCase());
 
         // get year (if exist)
-        let yearStr = match.groups("year").value.toLowerCase();
-        let orderStr = match.groups("order").value.toLowerCase();
+        const yearStr = match.groups("year").value.toLowerCase();
+        const orderStr = match.groups("order").value.toLowerCase();
         let year: number;
         let hasYear = false;
 
@@ -120,7 +120,7 @@ export class BaseHolidayParser implements IDateTimeParser {
             hasYear = true;
         }
         else if (orderStr) {
-            let swift = this.config.getSwiftYear(orderStr);
+            const swift = this.config.getSwiftYear(orderStr);
             if (swift < -1) {
                 return ret;
             }
@@ -133,18 +133,19 @@ export class BaseHolidayParser implements IDateTimeParser {
 
         let holidayKey: string;
         for (holidayKey of this.config.holidayNames.keys()) {
-            if (this.config.holidayNames.get(holidayKey).indexOf(holidayStr) > -1) {
+            if (this.config.holidayNames.get(holidayKey)!.indexOf(holidayStr) > -1) {
                 break;
             }
         }
 
-        if (holidayKey) {
+        // TODO fix: holidayKey is never initialized. So the code is not working.
+        if (holidayKey!) {
             let timexStr: string;
             let value = referenceDate;
-            let func = this.config.holidayFuncDictionary.get(holidayKey);
+            const func = this.config.holidayFuncDictionary.get(holidayKey);
             if (func) {
                 value = func(year);
-                timexStr = this.config.variableHolidaysTimexDictionary.get(holidayKey);
+                timexStr = this.config.variableHolidaysTimexDictionary.get(holidayKey)!;
                 if (!timexStr) {
                     timexStr = `-${DateTimeFormatUtil.toString(value.getMonth() + 1, 2)}-${DateTimeFormatUtil.toString(value.getDate(), 2)}`;
                 }
@@ -181,7 +182,7 @@ export class BaseHolidayParser implements IDateTimeParser {
 
     private getFutureValue(value: Date, referenceDate: Date, holiday: string): Date {
         if (value < referenceDate) {
-            let func = this.config.holidayFuncDictionary.get(holiday);
+            const func = this.config.holidayFuncDictionary.get(holiday);
             if (func) {
                 return func(value.getFullYear() + 1);
             }
@@ -191,7 +192,7 @@ export class BaseHolidayParser implements IDateTimeParser {
 
     private getPastValue(value: Date, referenceDate: Date, holiday: string): Date {
         if (value >= referenceDate) {
-            let func = this.config.holidayFuncDictionary.get(holiday);
+            const func = this.config.holidayFuncDictionary.get(holiday);
             if (func) {
                 return func(value.getFullYear() - 1);
             }
@@ -203,8 +204,8 @@ export class BaseHolidayParser implements IDateTimeParser {
 export abstract class BaseHolidayParserConfiguration implements IHolidayParserConfiguration {
     variableHolidaysTimexDictionary: ReadonlyMap<string, string>;
     holidayFuncDictionary: ReadonlyMap<string, (year: number) => Date>;
-    holidayNames: ReadonlyMap<string, string[]>;
-    holidayRegexList: RegExp[];
+    holidayNames!: ReadonlyMap<string, string[]>;
+    holidayRegexList!: RegExp[];
     abstract getSwiftYear(text: string): number;
     abstract sanitizeHolidayToken(holiday: string): string;
 

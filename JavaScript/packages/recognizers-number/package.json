@@ -11,10 +11,13 @@
     "numex",
     "parser-library"
   ],
-  "main": "dist/recognizers-text-number.umd.js",
-  "module": "dist/recognizers-text-number.es5.js",
-  "typings": "dist/types/recognizers-text-number.d.ts",
-  "browser": "dist/recognizers-text-number.browser.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm5/index.js",
+  "es2015": "dist/esm2015/index.js",
+  "types": "dist/types/index.d.ts",
+  "browser": "dist/index.browser.js",
+  "sideEffects": false,
+  "files": ["dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/Recognizers-Text"
@@ -23,16 +26,21 @@
     "url": "https://github.com/Microsoft/Recognizers-Text/issues"
   },
   "engines": {
-    "node": ">=10.3.0"
+    "node": ">=16"
   },
   "scripts": {
-    "build-resources": "ts-node --project ../resource-generator/tsconfig.json ../resource-generator/ ../recognizers-number/resource-definitions.json",
-    "clean-build": "rimraf dist && rimraf compiled",
-    "prepare": "npm run build-resources && npm run clean-build && tsc && rollup -c"
+    "prebuild": "rimraf dist",
+    "build": "tsc -b tsconfig.build.cjs.json tsconfig.build.esm5.json tsconfig.build.esm2015.json tsconfig.build.types.json",
+    "watch": "tsc -b tsconfig.build.cjs.json tsconfig.build.esm5.json tsconfig.build.esm2015.json tsconfig.build.types.json --watch",
+    "prettier": "prettier -w -l src test package.json",
+    "eslint": "eslint src test --fix --ext .ts",
+    "rimraf": "rimraf dist",
+    "test": "jest --runInBand",
+    "build-resources": "ts-node --project ../resource-generator/tsconfig.json ../resource-generator/ ../recognizers-number/resource-definitions.json"
   },
   "dependencies": {
     "@microsoft/recognizers-text": "~1.3.0",
-    "bignumber.js": "^7.2.1",
+    "bignumber.js": "^9.1.1",
     "lodash.escaperegexp": "^4.1.2",
     "lodash.sortby": "^4.7.0",
     "lodash.trimend": "^4.5.1"

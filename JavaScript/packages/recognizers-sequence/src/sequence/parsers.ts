@@ -5,7 +5,7 @@ import { IParser, ExtractResult, ParseResult } from "@microsoft/recognizers-text
 
 export class BaseSequenceParser implements IParser {
     parse(extResult: ExtractResult): ParseResult {
-        let result = new ParseResult(extResult);
+        const result = new ParseResult(extResult);
         result.resolutionStr = extResult.text;
         return result;
     }
@@ -13,7 +13,7 @@ export class BaseSequenceParser implements IParser {
 
 export class BaseIpParser extends BaseSequenceParser {
     parse(extResult: ExtractResult): ParseResult {
-        let result = new ParseResult(extResult);
+        const result = new ParseResult(extResult);
         result.resolutionStr = this.dropLeadingZeros(extResult.text);
         return result;
     }
@@ -23,7 +23,7 @@ export class BaseIpParser extends BaseSequenceParser {
 
         let number = "";
         for (let i = 0; i < text.length; i++) {
-            let c = text[i];
+            const c = text[i];
             if (c == '.' || c == ':') {
                 if (number != "") {
                     number = number == "0" ? number : number.replace(/^(0*)/, "");

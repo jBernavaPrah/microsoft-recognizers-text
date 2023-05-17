@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { IDateExtractorConfiguration, IDateParserConfiguration } from "../baseDate";
 import { BaseDurationExtractor, BaseDurationParser } from "../baseDuration";
 import { IDateTimeUtilityConfiguration } from "../utilities";

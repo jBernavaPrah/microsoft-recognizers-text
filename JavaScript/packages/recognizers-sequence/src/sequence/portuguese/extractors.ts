@@ -1,12 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { BasePhoneNumberExtractorConfiguration, IIpExtractorConfiguration, BaseMentionExtractor, BaseHashtagExtractor, BaseEmailExtractor, IURLExtractorConfiguration, BaseGUIDExtractor, IPhoneNumberExtractorConfiguration } from "../extractors";
-import { ExtractResult, RegExpUtility } from "@microsoft/recognizers-text";
-import { BasePhoneNumbers } from "../../resources/basePhoneNumbers";
-import { BaseURL } from "../../resources/baseURL";
-import { BaseIp } from "../../resources/baseIp";
-import { PortuguesePhoneNumbers } from "../../resources/PortuguesePhoneNumbers";
+import { BasePhoneNumberExtractorConfiguration } from '../extractors';
+import { PortuguesePhoneNumbers } from '../../resources/portuguesePhoneNumbers';
 
 export class PortuguesePhoneNumberExtractorConfiguration extends BasePhoneNumberExtractorConfiguration {
     readonly FalsePositivePrefixRegex: string;

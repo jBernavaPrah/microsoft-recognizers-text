@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IExtractor, ExtractResult } from "@microsoft/recognizers-text";
-import { Constants } from "./constants";
-import { BaseNumbers } from "../resources/baseNumbers";
-import { EnglishNumeric } from "../resources/englishNumeric";
-import { Match, RegExpUtility } from "@microsoft/recognizers-text";
-import { LongFormatType } from "./models";
-import escapeRegExp = require("lodash.escaperegexp");
+import { IExtractor, ExtractResult } from '@microsoft/recognizers-text';
+import { Constants } from './constants';
+import { BaseNumbers } from '../resources/baseNumbers';
+import { Match, RegExpUtility } from '@microsoft/recognizers-text';
+import { LongFormatType } from './models';
+import escapeRegExp  from 'lodash.escaperegexp';
 
 export interface RegExpValue {
     regExp: RegExp;
@@ -21,13 +20,13 @@ export interface RegExpRegExp {
 
 export abstract class BaseNumberExtractor implements IExtractor {
 
-    regexes: RegExpValue[];
+    regexes!: RegExpValue[];
 
-    ambiguityFiltersDict: RegExpRegExp[];
+    ambiguityFiltersDict!: RegExpRegExp[];
 
-    protected extractType: string = "";
+    protected extractType: string = '';
 
-    protected negativeNumberTermsRegex: RegExp = null;
+    protected negativeNumberTermsRegex: RegExp | null = null;
 
     extract(source: string): ExtractResult[] {
         if (!source || source.trim().length === 0) {
@@ -35,13 +34,13 @@ export abstract class BaseNumberExtractor implements IExtractor {
         }
 
         let result = new Array<ExtractResult>();
-        let matchSource = new Map<Match, string>();
-        let matched = new Array<boolean>(source.length);
+        const matchSource = new Map<Match, string>();
+        const matched = new Array<boolean>(source.length);
         for (let i = 0; i < source.length; i++) {
             matched[i] = false;
         }
 
-        let collections = this.regexes
+        const collections = this.regexes
             .map(o => ({ matches: RegExpUtility.getMatches(o.regExp, source), value: o.value }))
             .filter(o => o.matches && o.matches.length);
 
@@ -63,13 +62,13 @@ export abstract class BaseNumberExtractor implements IExtractor {
                     let start = last + 1;
                     let length = i - last;
                     let substr = source.substring(start, start + length);
-                    let srcMatch = Array.from(matchSource.keys()).find(m => m.index === start && m.length === length);
+                    const srcMatch = Array.from(matchSource.keys()).find(m => m.index === start && m.length === length);
 
                     // Extract negative numbers
                     if (this.negativeNumberTermsRegex !== null) {
-                        let match = source.substr(0, start).match(this.negativeNumberTermsRegex);
+                        const match = source.substr(0, start).match(this.negativeNumberTermsRegex);
                         if (match) {
-                            start = match.index;
+                            start = match.index!;
                             length = length + match[0].length;
                             substr = match[0] + substr;
                         }
@@ -81,7 +80,7 @@ export abstract class BaseNumberExtractor implements IExtractor {
                             length: length,
                             text: substr,
                             type: this.extractType,
-                            data: matchSource.has(srcMatch) ? matchSource.get(srcMatch) : null
+                            data: matchSource.has(srcMatch) ? matchSource.get(srcMatch) : null,
                         } as ExtractResult);
                     }
                 }
@@ -95,13 +94,13 @@ export abstract class BaseNumberExtractor implements IExtractor {
         return result;
     }
 
-    private filterAmbiguity(extractResults: ExtractResult[], text: string) {
-        if (this.ambiguityFiltersDict !== null && this.ambiguityFiltersDict !== undefined){
-            for (let regex of this.ambiguityFiltersDict){
-                for (let extractResult of extractResults){
-                    if (RegExpUtility.isMatch(regex.regExpKey, extractResult.text)){
-                        let matches = RegExpUtility.getMatches(regex.regExpValue, text);
-                        if (matches && matches.length){
+    private filterAmbiguity(extractResults: ExtractResult[], text: string):ExtractResult[] {
+        if (this.ambiguityFiltersDict !== null && this.ambiguityFiltersDict !== undefined) {
+            for (const regex of this.ambiguityFiltersDict) {
+                for (const extractResult of extractResults) {
+                    if (RegExpUtility.isMatch(regex.regExpKey, extractResult.text)) {
+                        const matches = RegExpUtility.getMatches(regex.regExpValue, text);
+                        if (matches && matches.length) {
                             extractResults = extractResults.filter(er => matches.find(m => m.index < er.start + er.length && m.index + m.length > er.start) === undefined);
                         }
                     }
@@ -114,14 +113,14 @@ export abstract class BaseNumberExtractor implements IExtractor {
 
     protected generateLongFormatNumberRegexes(type: LongFormatType, placeholder: string = BaseNumbers.PlaceHolderDefault): RegExp {
 
-        let thousandsMark = escapeRegExp(type.thousandsMark);
-        let decimalsMark = escapeRegExp(type.decimalsMark);
+        const thousandsMark = escapeRegExp(type.thousandsMark);
+        const decimalsMark = escapeRegExp(type.decimalsMark);
 
-        let regexDefinition = type.decimalsMark === '\0'
+        const regexDefinition = type.decimalsMark === '\0'
             ? BaseNumbers.IntegerRegexDefinition(placeholder, thousandsMark)
             : BaseNumbers.DoubleRegexDefinition(placeholder, thousandsMark, decimalsMark);
 
-        return RegExpUtility.getSafeRegExp(regexDefinition, "gis");
+        return RegExpUtility.getSafeRegExp(regexDefinition, 'gis');
     }
 }
 
@@ -142,19 +141,18 @@ export abstract class BasePercentageExtractor implements IExtractor {
     protected abstract initRegexes(): RegExp[];
 
     extract(source: string): ExtractResult[] {
-        let originSource = source;
-        let positionMap: Map<number, number>;
-        let numExtResults: ExtractResult[];
+        const originSource = source;
 
         // preprocess the source sentence via extracting and replacing the numbers in it
-        let preprocess = this.preprocessStrWithNumberExtracted(originSource);
+        const preprocess = this.preprocessStrWithNumberExtracted(originSource);
         source = preprocess.source;
-        positionMap = preprocess.positionMap;
-        numExtResults = preprocess.numExtResults;
+        const positionMap: Map<number, number>= preprocess.positionMap;
+        const numExtResults: ExtractResult[]= preprocess.numExtResults;
 
-        let allMatches = this.regexes.map(rx => RegExpUtility.getMatches(rx, source));
 
-        let matched = new Array<boolean>(source.length);
+        const allMatches = this.regexes.map(rx => RegExpUtility.getMatches(rx, source));
+
+        const matched = new Array<boolean>(source.length);
         for (let i = 0; i < source.length; i++) {
             matched[i] = false;
         }
@@ -167,20 +165,20 @@ export abstract class BasePercentageExtractor implements IExtractor {
             });
         }
 
-        let result = new Array<ExtractResult>();
+        const result = new Array<ExtractResult>();
         let last = -1;
         // get index of each matched results
         for (let i = 0; i < source.length; i++) {
             if (matched[i]) {
-                if (i + 1 === source.length || matched[i + 1] === false) {
-                    let start = last + 1;
-                    let length = i - last;
-                    let substr = source.substring(start, start + length);
-                    let er: ExtractResult = {
+                if (i + 1 === source.length || !matched[i + 1]) {
+                    const start = last + 1;
+                    const length = i - last;
+                    const substr = source.substring(start, start + length);
+                    const er: ExtractResult = {
                         start: start,
                         length: length,
                         text: substr,
-                        type: this.extractType
+                        type: this.extractType,
                     } as ExtractResult;
                     result.push(er);
                 }
@@ -202,13 +200,13 @@ export abstract class BasePercentageExtractor implements IExtractor {
         positionMap: Map<number, number>,
         numExtResults: ExtractResult[]
     } {
-        let positionMap = new Map<number, number>();
+        const positionMap = new Map<number, number>();
 
-        let numExtResults = this.numberExtractor.extract(str);
-        let replaceText = BaseNumbers.NumberReplaceToken;
+        const numExtResults = this.numberExtractor.extract(str);
+        const replaceText = BaseNumbers.NumberReplaceToken;
 
-        let match = new Array<number>(str.length);
-        let strParts = new Array<number[]>();
+        const match = new Array<number>(str.length);
+        const strParts = new Array<number[]>();
         let start: number;
         let end: number;
         for (let i = 0; i < str.length; i++) {
@@ -216,8 +214,7 @@ export abstract class BasePercentageExtractor implements IExtractor {
         }
 
         for (let i = 0; i < numExtResults.length; i++) {
-            let extraction = numExtResults[i];
-            let subtext = extraction.text;
+            const extraction = numExtResults[i];
             start = extraction.start;
             end = extraction.length + start;
             for (let j = start; j < end; j++) {
@@ -236,12 +233,12 @@ export abstract class BasePercentageExtractor implements IExtractor {
         }
         strParts.push([start, str.length - 1]);
 
-        let ret = "";
+        let ret = '';
         let index = 0;
         strParts.forEach(strPart => {
             start = strPart[0];
             end = strPart[1];
-            let type = match[start];
+            const type = match[start];
             if (type === -1) {
                 ret += str.substring(start, end + 1);
                 for (let i = start; i <= end; i++) {
@@ -249,7 +246,6 @@ export abstract class BasePercentageExtractor implements IExtractor {
                 }
             }
             else {
-                let originalText = str.substring(start, end + 1);
                 ret += replaceText;
                 for (let i = 0; i < replaceText.length; i++) {
                     positionMap.set(index++, start);
@@ -263,28 +259,28 @@ export abstract class BasePercentageExtractor implements IExtractor {
         return {
             numExtResults: numExtResults,
             source: ret,
-            positionMap: positionMap
+            positionMap: positionMap,
         };
     }
 
     // replace the @sys.num to the real patterns, directly modifies the ExtractResult
     private postProcessing(results: ExtractResult[], originSource: string, positionMap: Map<number, number>, numExtResults: ExtractResult[]): void {
-        let replaceText = BaseNumbers.NumberReplaceToken;
+        const replaceText = BaseNumbers.NumberReplaceToken;
         for (let i = 0; i < results.length; i++) {
-            let start = results[i].start;
-            let end = start + results[i].length;
-            let str = results[i].text;
+            const start = results[i].start;
+            const end = start + results[i].length;
+            const str = results[i].text;
             if (positionMap.has(start) && positionMap.has(end)) {
-                let originStart = positionMap.get(start);
-                let originLenth = positionMap.get(end) - originStart;
+                const originStart = positionMap.get(start)!;
+                const originLenth = positionMap.get(end)! - originStart;
                 results[i].start = originStart;
                 results[i].length = originLenth;
                 results[i].text = originSource.substring(originStart, originStart + originLenth).trim();
-                let numStart = str.indexOf(replaceText);
+                const numStart = str.indexOf(replaceText);
                 if (numStart !== -1) {
-                    let numOriginStart = start + numStart;
+                    const numOriginStart = start + numStart;
                     if (positionMap.has(numStart)) {
-                        let dataKey = originSource.substring(positionMap.get(numOriginStart), positionMap.get(numOriginStart + replaceText.length));
+                        const dataKey = originSource.substring(positionMap.get(numOriginStart)!, positionMap.get(numOriginStart + replaceText.length));
 
                         for (let j = i; j < numExtResults.length; j++) {
                             if (results[i].start === numExtResults[j].start && results[i].text.includes(numExtResults[j].text)) {
@@ -301,9 +297,9 @@ export abstract class BasePercentageExtractor implements IExtractor {
     // read the rules
     protected buildRegexes(regexStrs: string[], ignoreCase: boolean = true): RegExp[] {
         return regexStrs.map(regexStr => {
-            let options = "gs";
+            let options = 'gs';
             if (ignoreCase) {
-                options += "i";
+                options += 'i';
             }
 
             return RegExpUtility.getSafeRegExp(regexStr, options);

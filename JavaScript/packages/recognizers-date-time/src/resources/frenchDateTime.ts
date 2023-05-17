@@ -15,10 +15,10 @@ export namespace FrenchDateTime {
     export const CheckBothBeforeAfter = false;
     export const TillRegex = `(?<till>\\b(au|et|(jusqu')?a|avant)\\b|(jusqu')?à|--|-|—|——)`;
     export const RangeConnectorRegex = `(?<and>\\b(de\\s+la|au|(jusqu')?a|et(\\s*la)?)\\b|(jusqu')?à|--|-|—|——)`;
-    export const RelativeRegex = `(?<order>prochaine?|de|du|ce(tte)?|l[ae]|derni[eè]re|hier|pr[eé]c[eé]dente|au\\s+cours+(de|du\\s*))`;
-    export const StrictRelativeRegex = `(?<order>prochaine?|derni[eè]re|hier|pr[eé]c[eé]dente|au\\s+cours+(de|du\\s*))`;
+    export const RelativeRegex = `(?<order>prochaine?|de|du|ce(tte)?|l[ae]|derni[eè]re?s?|hier|pr[eé]c[eé]dente|au\\s+cours+(de|du\\s*))`;
+    export const StrictRelativeRegex = `(?<order>prochaine?|derni[eè]re?s?|hier|pr[eé]c[eé]dente|au\\s+cours+(de|du\\s*))`;
     export const NextSuffixRegex = `(?<order>prochain(es?)?|suivante)\\b`;
-    export const PastSuffixRegex = `(?<order>derni[eè]r(es?)?|pr[eé]c[eé]dente)\\b`;
+    export const PastSuffixRegex = `(?<order>derni[eè]re?s?|pr[eé]c[eé]dente)\\b`;
     export const ThisPrefixRegex = `(?<order>ce(tte)?|au\\s+cours+(du|de))\\b`;
     export const RangePrefixRegex = `(du|depuis|des?|entre)`;
     export const DayRegex = `(?<day>(?:3[0-1]|[1-2]\\d|0?[1-9])(e(r)?)?)(?=\\b|t)`;
@@ -43,7 +43,7 @@ export namespace FrenchDateTime {
     export const RelativeMonthRegex = `(?<relmonth>(${ThisPrefixRegex}\\s+mois)|(mois\\s+${PastSuffixRegex})|(mois\\s+${NextSuffixRegex}))\\b`;
     export const WrittenMonthRegex = `(?<month>avril|avr(\\.)?|ao[uû]t|d[eé]cembre|d[eé]c(\\.)?|f[eé]vrier|f[eé]vr?(\\.)?|janvier|janv?(\\.)?|juillet|jui?[ln](\\.)?|mars?(\\.)?|mai|novembre|nov(\\.)?|octobre|oct(\\.)?|septembre|sept?(\\.)?(?!\\s+heures))`;
     export const MonthSuffixRegex = `(?<msuf>(en\\s*|le\\s*|de\\s*|dans\\s*)?(${RelativeMonthRegex}|${WrittenMonthRegex}))`;
-    export const DateUnitRegex = `(?<unit>an|mois|((l')?ann[eé]e|semaine|journ[eé]e|jour)(?<plural>s)?)\\b`;
+    export const DateUnitRegex = `(?<unit>an|(?<plural>mois)|((l')?ann[eé]e|semaine|journ[eé]e|jour)(?<plural>s)?)\\b`;
     export const SimpleCasesRegex = `\\b((d[ue])|entre\\s+)?(${DayRegex})\\s*${TillRegex}\\s*(${DayRegex})\\s+${MonthSuffixRegex}((\\s+|\\s*,\\s*)${YearRegex})?\\b`;
     export const MonthFrontSimpleCasesRegex = `\\b((d[ue]|entre)\\s+)?${MonthSuffixRegex}\\s+((d[ue]|entre)\\s+)?(${DayRegex})\\s*${TillRegex}\\s*(${DayRegex})((\\s+|\\s*,\\s*)${YearRegex})?\\b`;
     export const MonthFrontBetweenRegex = `\\b${MonthSuffixRegex}\\s+(entre|d[ue]\\s+)(${DayRegex})\\s*${RangeConnectorRegex}\\s*(${DayRegex})((\\s+|\\s*,\\s*)${YearRegex})?\\b`;
@@ -73,7 +73,7 @@ export namespace FrenchDateTime {
     export const ThisRegex = `\\b((cette(\\s*semaine)?\\s+)${WeekDayRegex})|(${WeekDayRegex}(\\s+cette\\s*semaine))\\b`;
     export const LastDateRegex = `\\b((${WeekDayRegex}(\\s*(de)?\\s*la\\s*semaine\\s+${PastSuffixRegex}))|(${WeekDayRegex}(\\s+${PastSuffixRegex})))\\b`;
     export const NextDateRegex = `\\b((${WeekDayRegex}(\\s+${NextSuffixRegex}))|(${WeekDayRegex}(\\s*(de)?\\s*la\\s*semaine\\s+${NextSuffixRegex})))\\b`;
-    export const SpecialDayRegex = `\\b(avant[\\s|-]hier|apr[eè]s(-demain|\\s*demain)|(le\\s)?jour suivant|(le\\s+)?dernier jour|hier|lendemain|demain|(de\\s)?la journ[ée]e|aujourd'hui)\\b`;
+    export const SpecialDayRegex = `\\b(avant[\\s|-]hier|apr[eè]s(-demain|\\s*demain)|(le\\s)?jour suivant|(le\\s+)?derni[eè]re?s? jour|hier|lendemain|demain|(de\\s)?la journ[ée]e|aujourd'hui)\\b`;
     export const SpecialDayWithNumRegex = `^\\b$`;
     export const StrictWeekDay = `\\b(?<weekday>dim(anche)?|lun(di)?|mar(di)?|mer(credi)?|jeu(di)?|ven(dredi)?|sam(edi)?)s?\\b`;
     export const SetWeekDayRegex = `\\b(?<prefix>le\\s+)?(?<weekday>matin([ée]e)?|apr[eè]s-midi|soir([ée]e)?|dimanche|lundi|mardi|mercredi|jeudi|vendredi|samedi)s\\b`;
@@ -114,7 +114,7 @@ export namespace FrenchDateTime {
     export const MorningRegex = `(?<morning>matin([ée]e)?)`;
     export const AfternoonRegex = `(?<afternoon>(d'|l')?apr[eè]s(-|\\s*)midi)`;
     export const MidmorningRegex = `(?<midmorning>milieu\\s*d[ue]\\s*${MorningRegex})`;
-    export const MiddayRegex = `(?<midday>milieu(\\s*|-)d[eu]\\s*(jour|midi)|apr[eè]s(-|\\s*)midi|(?<=\\bà\\s+)midi)`;
+    export const MiddayRegex = `(?<midday>milieu(\\s*|-)d[eu]\\s*(jour|midi)|apr[eè]s(-|\\s*)midi|(?<=à\\s+)midi)`;
     export const MidafternoonRegex = `(?<midafternoon>milieu\\s*d'+${AfternoonRegex})`;
     export const MidTimeRegex = `(?<mid>(${MidnightRegex}|${MidmorningRegex}|${MidafternoonRegex}|${MiddayRegex}))`;
     export const AtRegex = `\\b(((?<=\\b[àa]\\s+)(${WrittenTimeRegex}|${HourNumRegex}(\\s+heures)?|${BaseDateTime.HourRegex}|${MidTimeRegex}))|${MidTimeRegex})\\b`;
@@ -169,8 +169,8 @@ export namespace FrenchDateTime {
     export const EachUnitRegex = `(?<each>(chaque|toutes les|tous les)(?<other>\\s+autres)?\\s*${DurationUnitRegex})`;
     export const EachPrefixRegex = `\\b(?<each>(chaque|tous les|(toutes les))\\s*$)`;
     export const SetEachRegex = `\\b(?<each>(chaque|tous les|(toutes les))\\s*)`;
-    export const SetLastRegex = `(?<last>prochain|dernier|derni[eè]re|pass[ée]s|pr[eé]c[eé]dent|courant|en\\s*cours)`;
-    export const EachDayRegex = `^\\s*(chaque|tous les)\\s*(jour|jours)\\b`;
+    export const SetLastRegex = `(?<last>prochain|derni[eè]re?s?|pass[ée]s|pr[eé]c[eé]dent|courant|en\\s*cours)`;
+    export const EachDayRegex = `\\s*(chaque|tous les)\\s*(jour|jours)\\b`;
     export const DurationFollowedUnit = `^\\s*${SuffixAndRegex}?(\\s+|-)?${DurationUnitRegex}`;
     export const NumberCombinedWithDurationUnit = `\\b(?<num>\\d+(\\.\\d*)?)(-)?${DurationUnitRegex}`;
     export const AnUnitRegex = `\\b(((?<half>demi\\s+)?(-)\\s+${DurationUnitRegex}))`;

@@ -22,7 +22,7 @@ export abstract class PortugueseNumberWithUnitExtractorConfiguration implements 
     readonly connectorToken: string;
     readonly compoundUnitConnectorRegex: RegExp;
     readonly nonUnitRegex: RegExp;
-    readonly ambiguousUnitNumberMultiplierRegex: RegExp;
+    readonly ambiguousUnitNumberMultiplierRegex!: RegExp;
 
     constructor(ci: CultureInfo) {
         this.cultureInfo = ci;
@@ -43,8 +43,8 @@ export class PortugueseNumberWithUnitParserConfiguration extends BaseNumberWithU
     readonly internalNumberParser: IParser;
     readonly internalNumberExtractor: IExtractor;
     readonly connectorToken: string;
-    readonly currencyNameToIsoCodeMap: ReadonlyMap<string, string>;
-    readonly currencyFractionCodeList: ReadonlyMap<string, string>;
+    readonly currencyNameToIsoCodeMap!: ReadonlyMap<string, string>;
+    readonly currencyFractionCodeList!: ReadonlyMap<string, string>;
 
     constructor(ci: CultureInfo) {
         super(ci);

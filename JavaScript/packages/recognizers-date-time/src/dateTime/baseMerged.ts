@@ -1,46 +1,46 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-import { IExtractor, ExtractResult, MetaData } from "@microsoft/recognizers-text";
-import { Constants, TimeTypeConstants } from "./constants";
-import { RegExpUtility, StringUtility, BaseNumberExtractor } from "@microsoft/recognizers-text-number";
-import { IDateTimeParser, DateTimeParseResult } from "./parsers";
-import { DateTimeFormatUtil, DateUtils, DateTimeResolutionResult, Token, StringMap } from "./utilities";
-import { BaseDateExtractor, BaseDateParser } from "./baseDate";
-import { BaseTimeExtractor, BaseTimeParser } from "./baseTime";
-import { BaseDatePeriodExtractor, BaseDatePeriodParser } from "./baseDatePeriod";
-import { BaseTimePeriodExtractor, BaseTimePeriodParser } from "./baseTimePeriod";
-import { IDateTimeExtractor, BaseDateTimeExtractor, BaseDateTimeParser } from "./baseDateTime";
-import { BaseDateTimePeriodExtractor, BaseDateTimePeriodParser } from "./baseDateTimePeriod";
-import { BaseSetExtractor, BaseSetParser } from "./baseSet";
-import { BaseDurationExtractor, BaseDurationParser } from "./baseDuration";
-import { BaseHolidayExtractor, BaseHolidayParser } from "./baseHoliday";
-import isEqual = require('lodash.isequal');
-import { DateTimeOptions } from "./dateTimeRecognizer";
+// @ts-nocheck
+import { IExtractor, ExtractResult, MetaData } from '@microsoft/recognizers-text';
+import { Constants, TimeTypeConstants } from './constants';
+import { RegExpUtility, StringUtility, BaseNumberExtractor } from '@microsoft/recognizers-text-number';
+import { IDateTimeParser, DateTimeParseResult } from './parsers';
+import { DateTimeFormatUtil, DateUtils, DateTimeResolutionResult, Token, StringMap } from './utilities';
+import { BaseDateExtractor, BaseDateParser } from './baseDate';
+import { BaseTimeExtractor, BaseTimeParser } from './baseTime';
+import { BaseDatePeriodExtractor, BaseDatePeriodParser } from './baseDatePeriod';
+import { BaseTimePeriodExtractor, BaseTimePeriodParser } from './baseTimePeriod';
+import { IDateTimeExtractor, BaseDateTimeExtractor, BaseDateTimeParser } from './baseDateTime';
+import { BaseDateTimePeriodExtractor, BaseDateTimePeriodParser } from './baseDateTimePeriod';
+import { BaseSetExtractor, BaseSetParser } from './baseSet';
+import { BaseDurationExtractor, BaseDurationParser } from './baseDuration';
+import { BaseHolidayExtractor, BaseHolidayParser } from './baseHoliday';
+import isEqual from 'lodash.isequal';
+import { DateTimeOptions } from './dateTimeRecognizer';
 
 export interface IMergedExtractorConfiguration {
-    dateExtractor: IDateTimeExtractor
-    timeExtractor: IDateTimeExtractor
-    dateTimeExtractor: IDateTimeExtractor
-    datePeriodExtractor: IDateTimeExtractor
-    timePeriodExtractor: IDateTimeExtractor
-    dateTimePeriodExtractor: IDateTimeExtractor
-    holidayExtractor: IDateTimeExtractor
-    durationExtractor: IDateTimeExtractor
-    setExtractor: IDateTimeExtractor
-    integerExtractor: BaseNumberExtractor
-    afterRegex: RegExp
-    beforeRegex: RegExp
-    sinceRegex: RegExp
-    fromToRegex: RegExp
-    singleAmbiguousMonthRegex: RegExp
-    ambiguousRangeModifierPrefix: RegExp
-    potentialAmbiguousRangeRegex: RegExp
-    prepositionSuffixRegex: RegExp
-    numberEndingPattern: RegExp
-    unspecificDatePeriodRegex: RegExp
-    filterWordRegexList: RegExp[]
-    AmbiguityFiltersDict: Map<RegExp, RegExp>
+    dateExtractor: IDateTimeExtractor;
+    timeExtractor: IDateTimeExtractor;
+    dateTimeExtractor: IDateTimeExtractor;
+    datePeriodExtractor: IDateTimeExtractor;
+    timePeriodExtractor: IDateTimeExtractor;
+    dateTimePeriodExtractor: IDateTimeExtractor;
+    holidayExtractor: IDateTimeExtractor;
+    durationExtractor: IDateTimeExtractor;
+    setExtractor: IDateTimeExtractor;
+    integerExtractor: BaseNumberExtractor;
+    afterRegex: RegExp;
+    beforeRegex: RegExp;
+    sinceRegex: RegExp;
+    fromToRegex: RegExp;
+    singleAmbiguousMonthRegex: RegExp;
+    ambiguousRangeModifierPrefix: RegExp;
+    potentialAmbiguousRangeRegex: RegExp;
+    prepositionSuffixRegex: RegExp;
+    numberEndingPattern: RegExp;
+    unspecificDatePeriodRegex: RegExp;
+    filterWordRegexList: RegExp[];
+    AmbiguityFiltersDict: Map<RegExp, RegExp>;
 }
 
 export class BaseMergedExtractor implements IDateTimeExtractor {
@@ -58,7 +58,7 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
         if (!refDate) {
             refDate = new Date();
         }
-        let referenceDate = refDate;
+        const referenceDate = refDate;
 
         let result: ExtractResult[] = new Array<ExtractResult>();
         this.addTo(result, this.config.dateExtractor.extract(source, referenceDate), source);
@@ -91,9 +91,9 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
     }
 
     private checkCalendarFilterList(ers: ExtractResult[], text: string) {
-        for (let er of ers.reverse()) {
-            for (let negRegex of this.config.filterWordRegexList) {
-                let match = RegExpUtility.getMatches(negRegex, er.text).pop();
+        for (const er of ers.reverse()) {
+            for (const negRegex of this.config.filterWordRegexList) {
+                const match = RegExpUtility.getMatches(negRegex, er.text).pop();
                 if (match) {
                     ers.splice(ers.indexOf(er));
                 }
@@ -103,21 +103,21 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
 
     // handle cases like "move 3pm appointment to 4"
     private numberEndingRegexMatch(text: string, extractResults: ExtractResult[]): ExtractResult[] {
-        let tokens = new Array<Token>();
+        const tokens = new Array<Token>();
 
         extractResults.forEach(extractResult => {
             if (extractResult.type === Constants.SYS_DATETIME_TIME
                 || extractResult.type === Constants.SYS_DATETIME_DATETIME) {
-                let stringAfter = text.substring(extractResult.start + extractResult.length);
-                let match = RegExpUtility.getMatches(this.config.numberEndingPattern, stringAfter);
+                const stringAfter = text.substring(extractResult.start + extractResult.length);
+                const match = RegExpUtility.getMatches(this.config.numberEndingPattern, stringAfter);
                 if (match != null && match.length) {
-                    let newTime = match[0].groups("newTime");
-                    let numRes = this.config.integerExtractor.extract(newTime.value);
+                    const newTime = match[0].groups('newTime');
+                    const numRes = this.config.integerExtractor.extract(newTime.value);
                     if (numRes.length === 0) {
                         return;
                     }
 
-                    let startPosition = extractResult.start + extractResult.length + newTime.index;
+                    const startPosition = extractResult.start + extractResult.length + newTime.index;
                     tokens.push(new Token(startPosition, startPosition + newTime.length));
                 }
             }
@@ -133,7 +133,7 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
             }
 
             let isFound = false;
-            let overlapIndexes = new Array<number>();
+            const overlapIndexes = new Array<number>();
             let firstIndex = -1;
             destination.forEach((dest, index) => {
                 if (ExtractResult.isOverlap(dest, value)) {
@@ -153,7 +153,7 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
                 destination.push(value);
             }
             else if (overlapIndexes.length) {
-                let tempDst = new Array<ExtractResult>();
+                const tempDst = new Array<ExtractResult>();
                 for (let i = 0; i < destination.length; i++) {
                     if (overlapIndexes.indexOf(i) === -1) {
                         tempDst.push(destination[i]);
@@ -172,34 +172,34 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
         return RegExpUtility.getMatches(this.config.fromToRegex, er.text).length > 0;
     }
 
-    private filterUnspecificDatePeriod (ers: ExtractResult[]): ExtractResult[] {
+    private filterUnspecificDatePeriod(ers: ExtractResult[]): ExtractResult[] {
         ers = ers.filter(er => !RegExpUtility.isMatch(this.config.unspecificDatePeriodRegex, er.text));
         return ers;
     }
 
     private filterAmbiguity(extractResults: ExtractResult[], text: string): ExtractResult[] {
-            if (this.config.AmbiguityFiltersDict != null) {
-                for (let [regexKey, regexValue] of this.config.AmbiguityFiltersDict) {
-                    extractResults.forEach(extractResult => {
-                        if (RegExpUtility.isMatch(regexKey, extractResult.text)) {
-                            let matches = RegExpUtility.getMatches(regexValue, text);
-                            extractResults = extractResults.filter(er => !matches.some(m => m.index < er.start + er.length && m.index + m.length > er.start));
-                        }
-                    });
-                }
+        if (this.config.AmbiguityFiltersDict != null) {
+            for (const [regexKey, regexValue] of this.config.AmbiguityFiltersDict) {
+                extractResults.forEach(extractResult => {
+                    if (RegExpUtility.isMatch(regexKey, extractResult.text)) {
+                        const matches = RegExpUtility.getMatches(regexValue, text);
+                        extractResults = extractResults.filter(er => !matches.some(m => m.index < er.start + er.length && m.index + m.length > er.start));
+                    }
+                });
             }
-
-            // @TODO: Refactor to remove this method and use the general ambiguity filter approach
-            extractResults = extractResults.filter(er => !(RegExpUtility.isMatch(BaseMergedExtractor.NumberOrConnectorRegex, er.text) &&
-                    (text.substring(0, er.start).trim().endsWith("-") || text.substring((er.start + er.length)).trim().startsWith("-"))));
-
-            return extractResults;
         }
+
+        // @TODO: Refactor to remove this method and use the general ambiguity filter approach
+        extractResults = extractResults.filter(er => !(RegExpUtility.isMatch(BaseMergedExtractor.NumberOrConnectorRegex, er.text) &&
+            (text.substring(0, er.start).trim().endsWith('-') || text.substring((er.start + er.length)).trim().startsWith('-'))));
+
+        return extractResults;
+    }
 
     private filterAmbiguousSingleWord(er: ExtractResult, text: string): boolean {
         let matches = RegExpUtility.getMatches(this.config.singleAmbiguousMonthRegex, er.text.toLowerCase());
         if (matches.length) {
-            let stringBefore = text.substring(0, er.start).replace(/\s+$/, '');
+            const stringBefore = text.substring(0, er.start).replace(/\s+$/, '');
             matches = RegExpUtility.getMatches(this.config.prepositionSuffixRegex, stringBefore);
             if (!matches.length) {
                 return true;
@@ -209,7 +209,7 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
     }
 
     protected addMod(ers: ExtractResult[], source: string) {
-        let lastEnd = 0;
+        const lastEnd = 0;
         ers.forEach(er => {
             let success = this.tryMergeModifierToken(er, this.config.beforeRegex, source);
             if (!success) {
@@ -223,25 +223,25 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
         });
     }
 
-    protected tryMergeModifierToken(er:ExtractResult, regex: RegExp, source: string, potentialAmbiguity:boolean = false): boolean {
-        let beforeStr = source.substr(0, er.start).toLowerCase();
+    protected tryMergeModifierToken(er: ExtractResult, regex: RegExp, source: string, potentialAmbiguity: boolean = false): boolean {
+        const beforeStr = source.substr(0, er.start).toLowerCase();
 
         // Avoid adding mod for ambiguity cases, such as "from" in "from ... to ..." should not add mod
         if (potentialAmbiguity && this.config.ambiguousRangeModifierPrefix &&
             RegExpUtility.isMatch(this.config.ambiguousRangeModifierPrefix, beforeStr)) {
-            let matches = RegExpUtility.getMatches(this.config.potentialAmbiguousRangeRegex, source);
+            const matches = RegExpUtility.getMatches(this.config.potentialAmbiguousRangeRegex, source);
             if (matches.find(m => m.index < er.start + er.length && m.index + m.length > er.start)) {
-                return false
+                return false;
             }
         }
 
-        let token = this.hasTokenIndex(beforeStr.trim(), regex);
+        const token = this.hasTokenIndex(beforeStr.trim(), regex);
         if (token.matched) {
-            let modLength = beforeStr.length - token.index;
+            const modLength = beforeStr.length - token.index;
             er.length += modLength;
             er.start -= modLength;
             er.text = source.substr(er.start, er.length);
-            
+
             er.metaData = this.assignModMetadata(er.metaData);
 
             return true;
@@ -250,23 +250,24 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
         return false;
     }
 
-    protected assignModMetadata(metadata: MetaData): MetaData {
+    protected assignModMetadata(metadata: MetaData | null): MetaData | null {
 
         if (metadata === undefined || metadata === null) {
             metadata = new MetaData();
             metadata.HasMod = true;
-        } else {
+        }
+        else {
             metadata.HasMod = true;
         }
 
-        return metadata
+        return metadata;
     }
 
     protected hasTokenIndex(source: string, regex: RegExp): { matched: boolean, index: number } {
         // This part is different from C# because no Regex RightToLeft option in JS
-        let result = { matched: false, index: -1 };
-        let matchResult = RegExpUtility.getMatches(regex, source);
-        let match = matchResult[matchResult.length - 1];
+        const result = { matched: false, index: -1 };
+        const matchResult = RegExpUtility.getMatches(regex, source);
+        const match = matchResult[matchResult.length - 1];
         if (match && !source.substr(match.index + match.length).trim().length) {
             result.matched = true;
             result.index = match.index;
@@ -276,18 +277,18 @@ export class BaseMergedExtractor implements IDateTimeExtractor {
 }
 
 export interface IMergedParserConfiguration {
-    beforeRegex: RegExp
-    afterRegex: RegExp
-    sinceRegex: RegExp
-    dateParser: BaseDateParser
-    holidayParser: BaseHolidayParser
-    timeParser: BaseTimeParser
-    dateTimeParser: BaseDateTimeParser
-    datePeriodParser: BaseDatePeriodParser
-    timePeriodParser: BaseTimePeriodParser
-    dateTimePeriodParser: BaseDateTimePeriodParser
-    durationParser: BaseDurationParser
-    setParser: BaseSetParser
+    beforeRegex: RegExp;
+    afterRegex: RegExp;
+    sinceRegex: RegExp;
+    dateParser: BaseDateParser;
+    holidayParser: BaseHolidayParser;
+    timeParser: BaseTimeParser;
+    dateTimeParser: BaseDateTimeParser;
+    datePeriodParser: BaseDatePeriodParser;
+    timePeriodParser: BaseTimePeriodParser;
+    dateTimePeriodParser: BaseDateTimePeriodParser;
+    durationParser: BaseDurationParser;
+    setParser: BaseSetParser;
 }
 
 export class BaseMergedParser implements IDateTimeParser {
@@ -306,19 +307,19 @@ export class BaseMergedParser implements IDateTimeParser {
     }
 
     parse(er: ExtractResult, refTime?: Date): DateTimeParseResult | null {
-        let referenceTime = refTime || new Date();
-        let pr: DateTimeParseResult = null;
+        const referenceTime = refTime || new Date();
+        let pr: DateTimeParseResult | null = null;
 
         // push, save teh MOD string
         let hasBefore = false;
         let hasAfter = false;
         let hasSince = false;
-        let modStr = "";
+        let modStr = '';
 
         if (er.metaData !== null && er.metaData !== undefined && er.metaData.HasMod) {
-            let beforeMatch = RegExpUtility.getMatches(this.config.beforeRegex, er.text).shift();
-            let afterMatch = RegExpUtility.getMatches(this.config.afterRegex, er.text).shift();
-            let sinceMatch = RegExpUtility.getMatches(this.config.sinceRegex, er.text).shift();
+            const beforeMatch = RegExpUtility.getMatches(this.config.beforeRegex, er.text).shift();
+            const afterMatch = RegExpUtility.getMatches(this.config.afterRegex, er.text).shift();
+            const sinceMatch = RegExpUtility.getMatches(this.config.sinceRegex, er.text).shift();
             if (beforeMatch && beforeMatch.index === 0) {
                 hasBefore = true;
                 er.start += beforeMatch.length;
@@ -340,7 +341,7 @@ export class BaseMergedParser implements IDateTimeParser {
                 er.text = er.text.substring(sinceMatch.length);
                 modStr = sinceMatch.value;
             }
-        }         
+        }
 
         if (er.type === Constants.SYS_DATETIME_DATE) {
             if (er.metaData !== null && er.metaData !== undefined && er.metaData.IsHoliday) {
@@ -375,12 +376,16 @@ export class BaseMergedParser implements IDateTimeParser {
             return null;
         }
 
+        if (!pr) {
+            return null;
+        }
+
         // pop, restore the MOD string
         if (hasBefore && pr.value !== null) {
             pr.length += modStr.length;
             pr.start -= modStr.length;
             pr.text = modStr + pr.text;
-            let val = pr.value;
+            const val = pr.value;
             val.mod = this.combineMod(val.mod, TimeTypeConstants.beforeMod);
             pr.value = val;
         }
@@ -389,7 +394,7 @@ export class BaseMergedParser implements IDateTimeParser {
             pr.length += modStr.length;
             pr.start -= modStr.length;
             pr.text = modStr + pr.text;
-            let val = pr.value;
+            const val = pr.value;
             val.mod = this.combineMod(val.mod, TimeTypeConstants.afterMod);
             pr.value = val;
         }
@@ -398,7 +403,7 @@ export class BaseMergedParser implements IDateTimeParser {
             pr.length += modStr.length;
             pr.start -= modStr.length;
             pr.text = modStr + pr.text;
-            let val = pr.value;
+            const val = pr.value;
             val.mod = this.combineMod(val.mod, TimeTypeConstants.sinceMod);
             pr.value = val;
         }
@@ -415,7 +420,7 @@ export class BaseMergedParser implements IDateTimeParser {
     }
 
     public setParseResult(slot: DateTimeParseResult, hasBefore: boolean, hasAfter: boolean, hasSince: boolean): DateTimeParseResult {
-        let hasRangeChangingMod = hasBefore || hasAfter || hasSince;
+        const hasRangeChangingMod = hasBefore || hasAfter || hasSince;
         slot.value = this.dateTimeResolution(slot, hasBefore, hasAfter, hasSince);
         // change the type at last for the after or before mode
         slot.type = `${this.parserTypeName}.${this.determineDateTimeType(slot.type, hasRangeChangingMod)}`;
@@ -423,7 +428,7 @@ export class BaseMergedParser implements IDateTimeParser {
     }
 
     protected getParseResult(extractorResult: ExtractResult, referenceDate: Date): DateTimeParseResult | null {
-        let extractorType = extractorResult.type;
+        const extractorType = extractorResult.type;
         if (extractorType === Constants.SYS_DATETIME_DATE) {
             if (extractorResult.metaData !== null && extractorResult.metaData !== undefined && extractorResult.metaData.IsHoliday) {
                 return this.config.holidayParser.parse(extractorResult, referenceDate);
@@ -455,13 +460,13 @@ export class BaseMergedParser implements IDateTimeParser {
         }
         return null;
     }
-    
+
     protected combineMod(originalMod: string, newMod: string): string {
         let combinedMod = newMod;
         if (originalMod) {
-            combinedMod = newMod + "-" + originalMod;
+            combinedMod = newMod + '-' + originalMod;
         }
-        
+
         return combinedMod;
     }
 
@@ -499,14 +504,16 @@ export class BaseMergedParser implements IDateTimeParser {
         if (newType === Constants.SYS_DATETIME_DATEPERIOD) {
             return Constants.SYS_DATETIME_DATETIMEPERIOD;
         }
+
+        return null;
     }
 
     public dateTimeResolutionForSplit(slot: DateTimeParseResult): DateTimeParseResult[] {
-        let results = new Array<DateTimeParseResult>();
+        const results = new Array<DateTimeParseResult>();
         if (slot.value.subDateTimeEntities != null) {
-            let subEntities = slot.value.subDateTimeEntities;
-            for (let subEntity of subEntities) {
-                let result = subEntity;
+            const subEntities = slot.value.subDateTimeEntities;
+            for (const subEntity of subEntities) {
+                const result = subEntity;
                 result.start += slot.start;
                 results.push(...this.dateTimeResolutionForSplit(result));
             }
@@ -519,43 +526,45 @@ export class BaseMergedParser implements IDateTimeParser {
         return results;
     }
 
-    protected dateTimeResolution(slot: DateTimeParseResult, hasBefore: boolean, hasAfter: boolean, hasSince: boolean): { [s: string]: StringMap[]; } {
+    protected dateTimeResolution(slot: DateTimeParseResult, hasBefore: boolean, hasAfter: boolean, hasSince: boolean): {
+        [s: string]: StringMap[]
+    } | null {
         if (!slot) {
             return null;
         }
 
-        let result = new Map<string, any>();
-        let resolutions = new Array<StringMap>();
+        const result = new Map<string, any>();
+        const resolutions = new Array<StringMap>();
 
-        let type = slot.type;
-        let outputType = this.determineDateTimeType(type, hasBefore || hasAfter || hasSince);
-        let sourceEntity = this.determineSourceEntityType(type, outputType, hasBefore || hasAfter || hasSince);
-        let timex = slot.timexStr;
+        const type = slot.type;
+        const outputType = this.determineDateTimeType(type, hasBefore || hasAfter || hasSince);
+        const sourceEntity = this.determineSourceEntityType(type, outputType, hasBefore || hasAfter || hasSince)!;
+        const timex = slot.timexStr;
 
-        let value: DateTimeResolutionResult = slot.value;
+        const value: DateTimeResolutionResult = slot.value;
         if (!value) {
             return null;
         }
 
-        let isLunar = value.isLunar;
-        let mod = value.mod;
-        let comment = value.comment;
+        const isLunar = value.isLunar;
+        const mod = value.mod;
+        const comment = value.comment;
 
         // the following should added to res first since the ResolveAmPm is using these fields
         this.addResolutionFieldsAny(result, Constants.TimexKey, timex);
         this.addResolutionFieldsAny(result, Constants.CommentKey, comment);
         this.addResolutionFieldsAny(result, Constants.ModKey, mod);
         this.addResolutionFieldsAny(result, Constants.TypeKey, outputType);
-        this.addResolutionFieldsAny(result, Constants.IsLunarKey, isLunar ? String(isLunar) : "");
+        this.addResolutionFieldsAny(result, Constants.IsLunarKey, isLunar ? String(isLunar) : '');
 
-        let futureResolution = value.futureResolution;
-        let pastResolution = value.pastResolution;
+        const futureResolution = value.futureResolution;
+        const pastResolution = value.pastResolution;
 
-        let future = this.generateFromResolution(type, futureResolution, mod);
-        let past = this.generateFromResolution(type, pastResolution, mod);
+        const future = this.generateFromResolution(type, futureResolution, mod);
+        const past = this.generateFromResolution(type, pastResolution, mod);
 
-        let futureValues = Array.from(this.getValues(future)).sort();
-        let pastValues = Array.from(this.getValues(past)).sort();
+        const futureValues = Array.from(this.getValues(future)).sort();
+        const pastValues = Array.from(this.getValues(past)).sort();
         if (isEqual(futureValues, pastValues)) {
             if (pastValues.length > 0) {
                 this.addResolutionFieldsAny(result, Constants.ResolveKey, past);
@@ -587,12 +596,12 @@ export class BaseMergedParser implements IDateTimeParser {
         result.forEach((value, key) => {
             if (this.isObject(value)) {
                 // is "StringMap"
-                let newValues = {};
+                const newValues: Record<string, any> = {};
 
                 this.addResolutionFields(newValues, Constants.TimexKey, timex);
                 this.addResolutionFields(newValues, Constants.ModKey, mod);
                 this.addResolutionFields(newValues, Constants.TypeKey, outputType);
-                this.addResolutionFields(newValues, Constants.IsLunarKey, isLunar ? String(isLunar) : "");
+                this.addResolutionFields(newValues, Constants.IsLunarKey, isLunar ? String(isLunar) : '');
                 this.addResolutionFields(newValues, Constants.SourceEntity, sourceEntity);
 
                 Object.keys(value).forEach((innerKey) => {
@@ -604,14 +613,14 @@ export class BaseMergedParser implements IDateTimeParser {
         });
 
         if (Object.keys(past).length === 0 && Object.keys(future).length === 0) {
-            let o = {};
+            const o: StringMap = {};
             o['timex'] = timex;
             o['type'] = outputType;
             o['value'] = 'not resolved';
             resolutions.push(o);
         }
         return {
-            values: resolutions
+            values: resolutions,
         };
     }
 
@@ -637,45 +646,45 @@ export class BaseMergedParser implements IDateTimeParser {
     }
 
     protected generateFromResolution(type: string, resolutions: StringMap, mod: string): StringMap {
-        let result = {};
+        const result: Record<string, any> = {};
         switch (type) {
-            case Constants.SYS_DATETIME_DATETIME:
-                this.addSingleDateTimeToResolution(resolutions, TimeTypeConstants.DATETIME, mod, result);
-                break;
+        case Constants.SYS_DATETIME_DATETIME:
+            this.addSingleDateTimeToResolution(resolutions, TimeTypeConstants.DATETIME, mod, result);
+            break;
 
-            case Constants.SYS_DATETIME_TIME:
-                this.addSingleDateTimeToResolution(resolutions, TimeTypeConstants.TIME, mod, result);
-                break;
+        case Constants.SYS_DATETIME_TIME:
+            this.addSingleDateTimeToResolution(resolutions, TimeTypeConstants.TIME, mod, result);
+            break;
 
-            case Constants.SYS_DATETIME_DATE:
-                this.addSingleDateTimeToResolution(resolutions, TimeTypeConstants.DATE, mod, result);
-                break;
+        case Constants.SYS_DATETIME_DATE:
+            this.addSingleDateTimeToResolution(resolutions, TimeTypeConstants.DATE, mod, result);
+            break;
 
-            case Constants.SYS_DATETIME_DURATION:
-                if (resolutions.hasOwnProperty(TimeTypeConstants.DURATION)) {
-                    result[TimeTypeConstants.VALUE] = resolutions[TimeTypeConstants.DURATION];
-                }
+        case Constants.SYS_DATETIME_DURATION:
+            if (resolutions.hasOwnProperty(TimeTypeConstants.DURATION)) {
+                result[TimeTypeConstants.VALUE] = resolutions[TimeTypeConstants.DURATION];
+            }
 
-                break;
+            break;
 
-            case Constants.SYS_DATETIME_TIMEPERIOD:
-                this.addPeriodToResolution(resolutions, TimeTypeConstants.START_TIME, TimeTypeConstants.END_TIME, mod, result);
-                break;
+        case Constants.SYS_DATETIME_TIMEPERIOD:
+            this.addPeriodToResolution(resolutions, TimeTypeConstants.START_TIME, TimeTypeConstants.END_TIME, mod, result);
+            break;
 
-            case Constants.SYS_DATETIME_DATEPERIOD:
-                this.addPeriodToResolution(resolutions, TimeTypeConstants.START_DATE, TimeTypeConstants.END_DATE, mod, result);
-                break;
+        case Constants.SYS_DATETIME_DATEPERIOD:
+            this.addPeriodToResolution(resolutions, TimeTypeConstants.START_DATE, TimeTypeConstants.END_DATE, mod, result);
+            break;
 
-            case Constants.SYS_DATETIME_DATETIMEPERIOD:
-                this.addPeriodToResolution(resolutions, TimeTypeConstants.START_DATETIME, TimeTypeConstants.END_DATETIME, mod, result);
-                break;
+        case Constants.SYS_DATETIME_DATETIMEPERIOD:
+            this.addPeriodToResolution(resolutions, TimeTypeConstants.START_DATETIME, TimeTypeConstants.END_DATETIME, mod, result);
+            break;
         }
         return result;
     }
 
     private addSingleDateTimeToResolution(resolutions: StringMap, type: string, mod: string, result: StringMap) {
         let key = TimeTypeConstants.VALUE;
-        let value = resolutions[type];
+        const value = resolutions[type];
         if (!value || this.dateMinValue === value || this.dateTimeMinValue === value || value.startsWith(this.dateDefaultValue)) {
             return;
         }
@@ -696,8 +705,8 @@ export class BaseMergedParser implements IDateTimeParser {
     }
 
     private addPeriodToResolution(resolutions: StringMap, startType: string, endType: string, mod: string, result: StringMap) {
-        let start = resolutions[startType];
-        let end = resolutions[endType];
+        const start = resolutions[startType];
+        const end = resolutions[endType];
         if (start === Constants.InvalidDateString || end === Constants.InvalidDateString) {
             return;
         }
@@ -747,19 +756,18 @@ export class BaseMergedParser implements IDateTimeParser {
     }
 
     protected processDoubleTimex(resolutionDic: Map<string, any>, futureKey: string, pastKey: string, originTimex: string) {
-        let timexes = originTimex.split(Constants.CompositeTimexDelimiter);
+        const timexes = originTimex.split(Constants.CompositeTimexDelimiter);
 
-        if (!resolutionDic.has(futureKey) || !resolutionDic.has(pastKey) || timexes.length != 2)
-        {
+        if (!resolutionDic.has(futureKey) || !resolutionDic.has(pastKey) || timexes.length != 2) {
             return;
         }
 
-        let futureResolution: StringMap = resolutionDic.get(futureKey);
-        let pastResolution: StringMap = resolutionDic.get(pastKey);
+        const futureResolution: StringMap = resolutionDic.get(futureKey);
+        const pastResolution: StringMap = resolutionDic.get(pastKey);
         futureResolution[Constants.TimexKey] = timexes[0];
         pastResolution[Constants.TimexKey] = timexes[1];
     }
-    
+
     private HasDoubleTimex(comment: string): boolean {
         return comment === Constants.Comment_DoubleTimex;
     }
@@ -769,51 +777,51 @@ export class BaseMergedParser implements IDateTimeParser {
             return;
         }
 
-        let resolution: StringMap = valuesMap.get(keyName);
+        const resolution: StringMap = valuesMap.get(keyName);
         if (!valuesMap.has('timex')) {
             return;
         }
 
-        let timex = valuesMap.get('timex');
+        const timex = valuesMap.get('timex');
         valuesMap.delete(keyName);
         valuesMap.set(keyName + 'Am', resolution);
 
-        let resolutionPm: StringMap = {};
+        const resolutionPm: StringMap = {};
         switch (valuesMap.get('type')) {
-            case Constants.SYS_DATETIME_TIME:
-                resolutionPm[TimeTypeConstants.VALUE] = DateTimeFormatUtil.toPm(resolution[TimeTypeConstants.VALUE]);
-                resolutionPm['timex'] = DateTimeFormatUtil.toPm(timex);
-                break;
+        case Constants.SYS_DATETIME_TIME:
+            resolutionPm[TimeTypeConstants.VALUE] = DateTimeFormatUtil.toPm(resolution[TimeTypeConstants.VALUE]);
+            resolutionPm['timex'] = DateTimeFormatUtil.toPm(timex);
+            break;
 
-            case Constants.SYS_DATETIME_DATETIME:
-                let splitValue = resolution[TimeTypeConstants.VALUE].split(' ');
-                resolutionPm[TimeTypeConstants.VALUE] = `${splitValue[0]} ${DateTimeFormatUtil.toPm(splitValue[1])}`;
-                resolutionPm['timex'] = DateTimeFormatUtil.allStringToPm(timex);
-                break;
+        case Constants.SYS_DATETIME_DATETIME:
+            const splitValue = resolution[TimeTypeConstants.VALUE].split(' ');
+            resolutionPm[TimeTypeConstants.VALUE] = `${splitValue[0]} ${DateTimeFormatUtil.toPm(splitValue[1])}`;
+            resolutionPm['timex'] = DateTimeFormatUtil.allStringToPm(timex);
+            break;
 
-            case Constants.SYS_DATETIME_TIMEPERIOD:
-                if (resolution.hasOwnProperty(TimeTypeConstants.START)) {
-                    resolutionPm[TimeTypeConstants.START] = DateTimeFormatUtil.toPm(resolution[TimeTypeConstants.START]);
-                }
-                if (resolution.hasOwnProperty(TimeTypeConstants.END)) {
-                    resolutionPm[TimeTypeConstants.END] = DateTimeFormatUtil.toPm(resolution[TimeTypeConstants.END]);
-                }
-                resolutionPm['timex'] = DateTimeFormatUtil.allStringToPm(timex);
-                break;
+        case Constants.SYS_DATETIME_TIMEPERIOD:
+            if (resolution.hasOwnProperty(TimeTypeConstants.START)) {
+                resolutionPm[TimeTypeConstants.START] = DateTimeFormatUtil.toPm(resolution[TimeTypeConstants.START]);
+            }
+            if (resolution.hasOwnProperty(TimeTypeConstants.END)) {
+                resolutionPm[TimeTypeConstants.END] = DateTimeFormatUtil.toPm(resolution[TimeTypeConstants.END]);
+            }
+            resolutionPm['timex'] = DateTimeFormatUtil.allStringToPm(timex);
+            break;
 
-            case Constants.SYS_DATETIME_DATETIMEPERIOD:
-                if (resolution.hasOwnProperty(TimeTypeConstants.START)) {
-                    let splitValue = resolution[TimeTypeConstants.START].split(' ');
-                    resolutionPm[TimeTypeConstants.START] = `${splitValue[0]} ${DateTimeFormatUtil.toPm(splitValue[1])}`;
-                }
+        case Constants.SYS_DATETIME_DATETIMEPERIOD:
+            if (resolution.hasOwnProperty(TimeTypeConstants.START)) {
+                const splitValue = resolution[TimeTypeConstants.START].split(' ');
+                resolutionPm[TimeTypeConstants.START] = `${splitValue[0]} ${DateTimeFormatUtil.toPm(splitValue[1])}`;
+            }
 
-                if (resolution.hasOwnProperty(TimeTypeConstants.END)) {
-                    let splitValue = resolution[TimeTypeConstants.END].split(' ');
-                    resolutionPm[TimeTypeConstants.END] = `${splitValue[0]} ${DateTimeFormatUtil.toPm(splitValue[1])}`;
-                }
+            if (resolution.hasOwnProperty(TimeTypeConstants.END)) {
+                const splitValue = resolution[TimeTypeConstants.END].split(' ');
+                resolutionPm[TimeTypeConstants.END] = `${splitValue[0]} ${DateTimeFormatUtil.toPm(splitValue[1])}`;
+            }
 
-                resolutionPm['timex'] = DateTimeFormatUtil.allStringToPm(timex);
-                break;
+            resolutionPm['timex'] = DateTimeFormatUtil.allStringToPm(timex);
+            break;
         }
 
         valuesMap.set(keyName + 'Pm', resolutionPm);

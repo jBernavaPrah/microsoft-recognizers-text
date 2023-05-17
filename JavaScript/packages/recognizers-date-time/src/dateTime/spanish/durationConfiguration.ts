@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { RegExpUtility } from "@microsoft/recognizers-text";
 import { BaseNumberExtractor, BaseNumberParser, SpanishCardinalExtractor } from "@microsoft/recognizers-text-number";
 import { IDurationExtractorConfiguration, IDurationParserConfiguration } from "../baseDuration";

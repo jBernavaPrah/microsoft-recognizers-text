@@ -15,7 +15,7 @@ export class JapaneseNumberParserConfiguration implements ICJKNumberParserConfig
     readonly cultureInfo: CultureInfo;
     readonly digitalNumberRegex: RegExp;
     readonly fractionMarkerToken: string;
-    readonly halfADozenRegex: RegExp;
+    readonly halfADozenRegex: RegExp | null;
     readonly halfADozenText: string;
     readonly langMarker: string;
     readonly nonDecimalSeparatorChar: string;
@@ -31,14 +31,14 @@ export class JapaneseNumberParserConfiguration implements ICJKNumberParserConfig
     readonly zeroToNineMap: ReadonlyMap<string, number>;
     readonly roundNumberMapChar: ReadonlyMap<string, number>;
     readonly fullToHalfMap: ReadonlyMap<string, string>;
-    readonly tratoSimMap: ReadonlyMap<string, string>;
+    readonly tratoSimMap: ReadonlyMap<string, string> | null;
     readonly unitMap: ReadonlyMap<string, string>;
     readonly roundDirectList: readonly string[];
     readonly tenChars: readonly string[];
     readonly digitNumRegex: RegExp;
     readonly dozenRegex: RegExp;
     readonly percentageRegex: RegExp;
-    readonly percentageNumRegex: RegExp;
+    readonly percentageNumRegex: RegExp | null;
     readonly doubleAndRoundRegex: RegExp;
     readonly fracSplitRegex: RegExp;
     readonly negativeNumberSignRegex: RegExp;
@@ -49,7 +49,7 @@ export class JapaneseNumberParserConfiguration implements ICJKNumberParserConfig
 
     // readonly NumberOptions Options { get; }
     // readonly Regex FractionPrepositionRegex { get; }
-    // readonly string NonDecimalSeparatorText 
+    // readonly string NonDecimalSeparatorText
 
     constructor(ci?: CultureInfo) {
         if (!ci) {

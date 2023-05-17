@@ -1,8 +1,5 @@
 {
-  "lerna": "2.11.0",
-  "packages": [
-    "packages/recognizers-*",
-    "packages/datatypes-date-time"
-  ],
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json",
+  "useWorkspaces": true,
   "version": "1.3.0"
 }

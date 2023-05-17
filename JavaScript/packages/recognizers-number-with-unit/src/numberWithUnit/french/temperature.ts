@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { CultureInfo, Culture, RegExpUtility } from "@microsoft/recognizers-text-number";
-import { Constants } from "../constants";
-import { FrenchNumberWithUnitExtractorConfiguration, FrenchNumberWithUnitParserConfiguration } from "./base";
-import { FrenchNumericWithUnit } from "../../resources/frenchNumericWithUnit";
-import { BaseUnits } from "../../resources/baseUnits";
+import { CultureInfo, Culture, RegExpUtility } from '@microsoft/recognizers-text-number';
+import { Constants } from '../constants';
+import { FrenchNumberWithUnitExtractorConfiguration, FrenchNumberWithUnitParserConfiguration } from './base';
+import { FrenchNumericWithUnit } from '../../resources/frenchNumericWithUnit';
+import { BaseUnits } from '../../resources/baseUnits';
 
 export class FrenchTemperatureExtractorConfiguration extends FrenchNumberWithUnitExtractorConfiguration {
     readonly suffixList: ReadonlyMap<string, string>;
@@ -27,7 +27,7 @@ export class FrenchTemperatureExtractorConfiguration extends FrenchNumberWithUni
         this.prefixList = new Map<string, string>();
         this.ambiguousUnitList = new Array<string>();
 
-        this.ambiguousUnitNumberMultiplierRegex = RegExpUtility.getSafeRegExp(BaseUnits.AmbiguousUnitNumberMultiplierRegex, "gs");
+        this.ambiguousUnitNumberMultiplierRegex = RegExpUtility.getSafeRegExp(BaseUnits.AmbiguousUnitNumberMultiplierRegex, 'gs');
     }
 }
 
@@ -43,5 +43,5 @@ export class FrenchTemperatureParserConfiguration extends FrenchNumberWithUnitPa
         this.BindDictionary(FrenchNumericWithUnit.TemperatureSuffixList);
     }
 
-    readonly connectorToken: string;
+    readonly connectorToken: string | null;
 }

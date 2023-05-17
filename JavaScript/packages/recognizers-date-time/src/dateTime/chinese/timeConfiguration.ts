@@ -2,13 +2,11 @@
 // Licensed under the MIT License.
 
 import { RegExpUtility, StringUtility, ExtractResult } from "@microsoft/recognizers-text";
-import { CultureInfo, Culture } from "@microsoft/recognizers-text-number";
-import { NumberWithUnitExtractor, ChineseNumberWithUnitExtractorConfiguration } from "@microsoft/recognizers-text-number-with-unit";
 import { BaseDateTimeExtractor, DateTimeExtra, TimeResult, TimeResolutionUtils } from "./baseDateTime";
 import { BaseTimeParser } from "../baseTime";
 import { Constants, TimeTypeConstants } from "../constants";
-import { IDateTimeParser, DateTimeParseResult } from "../parsers";
-import { DateTimeResolutionResult, DateTimeFormatUtil, DateUtils, StringMap } from "../utilities";
+import {  DateTimeParseResult } from "../parsers";
+import { DateTimeResolutionResult, DateTimeFormatUtil, DateUtils } from "../utilities";
 import { ChineseDateTime } from "../../resources/chineseDateTime";
 
 export enum TimeType {
@@ -49,19 +47,19 @@ export class ChineseTimeParser extends BaseTimeParser {
         this.innerExtractor = new ChineseTimeExtractor();
     }
 
-    public parse(er: ExtractResult, referenceTime?: Date): DateTimeParseResult | null {
+    public parse(er: ExtractResult, referenceTime?: Date): DateTimeParseResult  {
         if (!referenceTime) {
             referenceTime = new Date();
         }
 
         let extra: DateTimeExtra<TimeType> = er.data;
         if (!extra) {
-            let innerResult = this.innerExtractor.extract(er.text, referenceTime).pop();
+            const innerResult = this.innerExtractor.extract(er.text, referenceTime).pop()!;
             extra = innerResult.data;
         }
 
-        let timeResult = this.functionMap.get(extra.dataType)(extra);
-        let parseResult = this.packTimeResult(extra, timeResult, referenceTime);
+        const timeResult = this.functionMap.get(extra.dataType)!(extra);
+        const parseResult = this.packTimeResult(extra, timeResult, referenceTime);
 
         if (parseResult.success) {
             parseResult.futureResolution = {};
@@ -70,7 +68,7 @@ export class ChineseTimeParser extends BaseTimeParser {
             parseResult.pastResolution[TimeTypeConstants.TIME] = DateTimeFormatUtil.formatTime(parseResult.pastValue);
         }
 
-        let result = new DateTimeParseResult(er);
+        const result = new DateTimeParseResult(er);
         result.value = parseResult;
         result.data = timeResult;
         result.resolutionStr = '';
@@ -80,13 +78,13 @@ export class ChineseTimeParser extends BaseTimeParser {
     }
 
     private handleLess(extra: DateTimeExtra<TimeType>): TimeResult {
-        let hour = this.matchToValue(extra.namedEntity('hour').value);
-        let quarter = this.matchToValue(extra.namedEntity('quarter').value);
-        let minute = !StringUtility.isNullOrEmpty(extra.namedEntity('half').value)
+        const hour = this.matchToValue(extra.namedEntity('hour').value);
+        const quarter = this.matchToValue(extra.namedEntity('quarter').value);
+        const minute = !StringUtility.isNullOrEmpty(extra.namedEntity('half').value)
             ? 30
             : quarter !== -1 ? quarter * 15 : 0;
-        let second = this.matchToValue(extra.namedEntity('sec').value);
-        let less = this.matchToValue(extra.namedEntity('min').value);
+        const second = this.matchToValue(extra.namedEntity('sec').value);
+        const less = this.matchToValue(extra.namedEntity('min').value);
 
         let all = hour * 60 + minute - less;
         if (all < 0) {
@@ -97,13 +95,13 @@ export class ChineseTimeParser extends BaseTimeParser {
     }
 
     private handleChinese(extra: DateTimeExtra<TimeType>): TimeResult {
-        let hour = this.matchToValue(extra.namedEntity('hour').value);
-        let quarter = this.matchToValue(extra.namedEntity('quarter').value);
-        let minute = !StringUtility.isNullOrEmpty(extra.namedEntity('half').value)
+        const hour = this.matchToValue(extra.namedEntity('hour').value);
+        const quarter = this.matchToValue(extra.namedEntity('quarter').value);
+        const minute = !StringUtility.isNullOrEmpty(extra.namedEntity('half').value)
             ? 30
             : quarter !== -1 ? quarter * 15
                 : this.matchToValue(extra.namedEntity('min').value);
-        let second = this.matchToValue(extra.namedEntity('sec').value);
+        const second = this.matchToValue(extra.namedEntity('sec').value);
 
         return new TimeResult(hour, minute, second);
     }
@@ -117,9 +115,9 @@ export class ChineseTimeParser extends BaseTimeParser {
     }
 
     private packTimeResult(extra: DateTimeExtra<TimeType>, timeResult: TimeResult, referenceTime: Date): DateTimeResolutionResult {
-        let result = new DateTimeResolutionResult();
-        let dayDescription = extra.namedEntity('daydesc').value;
-        let noDescription = StringUtility.isNullOrEmpty(dayDescription);
+        const result = new DateTimeResolutionResult();
+        const dayDescription = extra.namedEntity('daydesc').value;
+        const noDescription = StringUtility.isNullOrEmpty(dayDescription);
         if (noDescription) {
             result.comment = 'ampm';
         }
@@ -128,11 +126,11 @@ export class ChineseTimeParser extends BaseTimeParser {
         }
 
         let hour = timeResult.hour > 0 ? timeResult.hour : 0;
-        let min = timeResult.minute > 0 ? timeResult.minute : 0;
-        let sec = timeResult.second > 0 ? timeResult.second : 0;
-        let day = referenceTime.getDate();
-        let month = referenceTime.getMonth();
-        let year = referenceTime.getFullYear();
+        const min = timeResult.minute > 0 ? timeResult.minute : 0;
+        const sec = timeResult.second > 0 ? timeResult.second : 0;
+        const day = referenceTime.getDate();
+        const month = referenceTime.getMonth();
+        const year = referenceTime.getFullYear();
 
         let timex = 'T';
         if (timeResult.hour >= 0) {

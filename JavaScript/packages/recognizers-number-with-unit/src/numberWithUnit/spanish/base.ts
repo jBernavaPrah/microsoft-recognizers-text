@@ -22,7 +22,7 @@ export abstract class SpanishNumberWithUnitExtractorConfiguration implements INu
     readonly connectorToken: string;
     readonly compoundUnitConnectorRegex: RegExp;
     readonly nonUnitRegex: RegExp;
-    readonly ambiguousUnitNumberMultiplierRegex: RegExp;
+    readonly ambiguousUnitNumberMultiplierRegex!: RegExp;
 
     constructor(ci: CultureInfo) {
         this.cultureInfo = ci;
@@ -43,8 +43,8 @@ export class SpanishNumberWithUnitParserConfiguration extends BaseNumberWithUnit
     readonly internalNumberParser: IParser;
     readonly internalNumberExtractor: IExtractor;
     readonly connectorToken: string;
-    readonly currencyNameToIsoCodeMap: ReadonlyMap<string, string>;
-    readonly currencyFractionCodeList: ReadonlyMap<string, string>;
+    readonly currencyNameToIsoCodeMap!: ReadonlyMap<string, string>;
+    readonly currencyFractionCodeList!: ReadonlyMap<string, string>;
 
     constructor(ci: CultureInfo) {
         super(ci);

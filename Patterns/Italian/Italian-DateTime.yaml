@@ -105,7 +105,7 @@ FullTextYearRegex: !nestedRegex
 TwoDigitYearRegex: !nestedRegex
   def: \b(?<![$])(?<year>([0-9]\d))(?!(\s*((\:\d)|{AmDescRegex}|{PmDescRegex}|\.\d)))\b
   references: [ AmDescRegex, PmDescRegex]
-#This is a look-behind assertion. Some cases should extract two digits as year like 11/25/16, where 16 means 2016. 
+#This is a look-behind assertion. Some cases should extract two digits as year like 11/25/16, where 16 means 2016.
 #The assertion determines if not connected with am/pm or hour separator (:), which should be a time.
 DateYearRegex: !nestedRegex
   def: (?<year>{BaseDateTime.FourDigitYearRegex}|{TwoDigitYearRegex})
@@ -240,7 +240,7 @@ DateExtractor2: !nestedRegex
 DateExtractor3: !nestedRegex
   def: \b({WeekDayRegex}(\s+|\s*,\s*))?({DayRegex}(\.)?(\s*[/,.\- ]\s*|\s+di\s+){MonthRegex}(\.)?(\s*[/,.\- ]\s*{DateYearRegex})?|{BaseDateTime.FourDigitYearRegex}\s*[/,.\- ]\s*{DayRegex}\s*[/,.\- ]\s*{MonthRegex})\b
   references: [ WeekDayRegex, DayRegex, MonthRegex, DateYearRegex, BaseDateTime.FourDigitYearRegex ]
-# The final lookahead in DateExtractor4|5|7|A avoids extracting as date "10/1-11" from an input like "10/1-11/2/2017"  
+# The final lookahead in DateExtractor4|5|7|A avoids extracting as date "10/1-11" from an input like "10/1-11/2/2017"
 DateExtractor4: !nestedRegex
   def: \b({WeekDayRegex}(\s+|\s*,\s*))?((il|l')\s*)?{MonthNumRegex}\s*[/\\\-]\s*{DayRegex}(\.)?\s*[/\\\-]\s*{DateYearRegex}(?!\s*[/\\\-\.]\s*\d+)
   references: [ MonthNumRegex, DayRegex, DateYearRegex, WeekDayRegex ]
@@ -689,7 +689,6 @@ UnitValueMap: !dictionary
     anni: 31536000
     anno: 31536000
     semestre: 31536000
-    semestre: 31536000
     mesi: 2592000
     mese: 2592000
     settimane: 604800
@@ -743,7 +742,7 @@ CardinalMap: !dictionary
     quinta: 5
 DayOfWeek: !dictionary
   types: [ string, int ]
-  entries: 
+  entries:
     lunedì: 1
     martedì: 2
     mercoledì: 3
@@ -948,10 +947,7 @@ DayOfMonth: !dictionary
     '9': 9
     '10': 10
     '11': 11
-    '11': 11
     '12': 12
-    '12': 12
-    '13': 13
     '13': 13
     '14': 14
     '15': 15
@@ -973,7 +969,7 @@ DayOfMonth: !dictionary
     '31': 31
 DoubleNumbers: !dictionary
   types: [ string, double ]
-  entries: 
+  entries:
     mezzo: 0.5
     mezza: 0.5
     metà: 0.5
@@ -981,7 +977,7 @@ DoubleNumbers: !dictionary
     quarti: 0.25
 HolidayNames: !dictionary
   types: [ string, 'string[]' ]
-  entries: 
+  entries:
     easterday: [ pasqua, giornodipasqua, domenicadipasqua ]
     eastermonday: [ lunedidell'angelo ]
     fathersday: [ festadelpapà ]
@@ -1036,57 +1032,57 @@ AmbiguityFiltersDict: !dictionary
 # For TimeOfDay resolution
 MorningTermList: !list
   types: [ string ]
-  entries: 
+  entries:
     - mattino
     - mattina
     - mattine
     - mattinata
 AfternoonTermList: !list
   types: [ string ]
-  entries: 
+  entries:
     - pomeriggio
     - pomeriggi
     - dopo pranzo
 EveningTermList: !list
   types: [ string ]
-  entries: 
+  entries:
     - sera
     - sere
     - serata
 DaytimeTermList: !list
   types: [ string ]
-  entries: 
+  entries:
     - giorno
     - dì
     - giornata
 NightTermList: !list
   types: [ string ]
-  entries: 
+  entries:
     - notte
     - notti
     - nottata
 SameDayTerms: !list
   types: [ string ]
-  entries: 
+  entries:
     - oggi
 PlusOneDayTerms: !list
   types: [ string ]
-  entries: 
+  entries:
     - domani
     - giorno dopo
 MinusOneDayTerms: !list
   types: [ string ]
-  entries: 
+  entries:
     - ieri
     - giorno prima
 PlusTwoDayTerms: !list
   types: [ string ]
-  entries: 
+  entries:
     - dopodomani
     - domani l'altro
 MinusTwoDayTerms: !list
   types: [ string ]
-  entries: 
+  entries:
     - l'altroieri
     - altroieri
 # For DatePeriodParserConfiguration Logic

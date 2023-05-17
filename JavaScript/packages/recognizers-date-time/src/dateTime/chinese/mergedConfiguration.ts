@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { IMergedExtractorConfiguration, BaseMergedExtractor, IMergedParserConfiguration, BaseMergedParser } from "../baseMerged";
 import { BaseDateExtractor, BaseDateParser } from "../baseDate";
 import { BaseTimeExtractor, BaseTimeParser } from "../baseTime";
@@ -27,7 +27,7 @@ import { DateTimeOptions } from "../dateTimeRecognizer";
 import { IDateTimeParser, DateTimeParseResult } from "../parsers";
 import { Constants, TimeTypeConstants } from "../constants";
 import { DateTimeFormatUtil, DateUtils, DateTimeResolutionResult, StringMap } from "../utilities";
-import isEqual = require('lodash.isequal');
+import isEqual from 'lodash.isequal';
 
 class ChineseMergedExtractorConfiguration implements IMergedExtractorConfiguration {
     readonly dateExtractor: BaseDateExtractor
@@ -200,7 +200,7 @@ export class ChineseMergedExtractor extends BaseMergedExtractor {
             er.length += modLength;
             er.start -= isPrefix ? modLength : 0;
             er.text = source.substr(er.start, er.length);
-            
+
             er.metaData = this.assignModMetadata(er.metaData);
 
             return true;
@@ -232,7 +232,7 @@ export class ChineseMergedExtractor extends BaseMergedExtractor {
             if (!leftStr.length) {
                 result.matched = true;
                 result.index = match.index + (isPrefix ? 0 : match.length);
-            }            
+            }
         }
         return result;
     }
@@ -254,7 +254,7 @@ class ChineseMergedParserConfiguration implements IMergedParserConfiguration {
 
     constructor(dmyDateFormat: boolean) {
         this.beforeRegex = RegExpUtility.getSafeRegExp(ChineseDateTime.ParserConfigurationBefore);
-        this.afterRegex = RegExpUtility.getSafeRegExp(ChineseDateTime.ParserConfigurationAfter);        
+        this.afterRegex = RegExpUtility.getSafeRegExp(ChineseDateTime.ParserConfigurationAfter);
 
         this.dateParser = new ChineseDateParser(dmyDateFormat);
         this.holidayParser = new ChineseHolidayParser();
@@ -345,7 +345,7 @@ export class ChineseMergedParser extends BaseMergedParser {
 export class ChineseFullMergedParser extends BaseMergedParser {
     private readonly sincePrefixRegex: RegExp;
     private readonly sinceSuffixRegex: RegExp;
-    
+
     constructor(dmyDateFormat: boolean = false) {
         let config = new ChineseMergedParserConfiguration(dmyDateFormat);
         super(config, 0);

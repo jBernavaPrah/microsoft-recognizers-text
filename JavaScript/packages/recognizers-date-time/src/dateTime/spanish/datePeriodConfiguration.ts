@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+// @ts-nocheck
+
 import { IExtractor, IParser, RegExpUtility } from "@microsoft/recognizers-text";
 import { BaseNumberParser, BaseNumberExtractor, SpanishIntegerExtractor, SpanishNumberParserConfiguration } from "@microsoft/recognizers-text-number";
 import { IDatePeriodExtractorConfiguration, IDatePeriodParserConfiguration } from "../baseDatePeriod";

@@ -9,12 +9,15 @@
     "compiled"
   ],
   "engines": {
-    "node": ">=10.3.0"
+    "node": ">=16"
   },
   "scripts": {
     "build-resources": "ts-node --project tools/resource-generator/ tools/resource-generator/"
   },
   "dependencies": {
-    "js-yaml": "^3.9.1"
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.1.4"
   }
 }

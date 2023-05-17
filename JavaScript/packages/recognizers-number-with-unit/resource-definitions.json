@@ -78,6 +78,15 @@
                 "export namespace FrenchNumericWithUnit {"
             ],
             "footer": [ "}" ]
+        },
+        {
+            "input": [ "Italian", "Italian-NumbersWithUnit" ],
+            "output": "italianNumericWithUnit",
+            "header": [
+                "import { BaseNumbers } from \"./baseNumbers\";",
+                "export namespace ItalianNumericWithUnit {"
+            ],
+            "footer": [ "}" ]
         }
     ]
 }

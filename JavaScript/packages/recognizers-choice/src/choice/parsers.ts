@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IParser, ExtractResult, ParseResult } from "@microsoft/recognizers-text";
-import { Constants } from "./constants";
+import {IParser, ExtractResult, ParseResult} from "@microsoft/recognizers-text";
+import {Constants} from "./constants";
 
 export interface IChoiceParserConfiguration<T> {
     resolutions: Map<string, T>;
@@ -16,11 +16,11 @@ export class ChoiceParser<T> implements IParser {
     }
 
     parse(extResult: ExtractResult): ParseResult {
-        let result = new ParseResult(extResult);
+        const result = new ParseResult(extResult);
         result.value = this.config.resolutions.get(result.type);
         if (result.data.otherMatches) {
-            result.data.otherMatches = result.data.otherMatches.map(m => {
-                let r = new ParseResult(m);
+            result.data.otherMatches = result.data.otherMatches.map((m: ExtractResult | undefined) => {
+                const r = new ParseResult(m);
                 r.value = this.config.resolutions.get(r.type);
                 return r;
             });
@@ -31,11 +31,11 @@ export class ChoiceParser<T> implements IParser {
 
 export class BooleanParser extends ChoiceParser<boolean> {
     constructor() {
-        let resolutions = new Map<string, boolean>([
+        const resolutions = new Map<string, boolean>([
             [Constants.SYS_BOOLEAN_TRUE, true],
             [Constants.SYS_BOOLEAN_FALSE, false]
         ]);
-        let config: IChoiceParserConfiguration<boolean> = {
+        const config: IChoiceParserConfiguration<boolean> = {
             resolutions: resolutions
         };
         super(config);

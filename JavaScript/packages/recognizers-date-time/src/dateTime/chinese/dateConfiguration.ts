@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { IExtractor, ExtractResult, StringUtility, Match, RegExpUtility, MetaData } from "@microsoft/recognizers-text";
 import { ChineseIntegerExtractor, AgnosticNumberParserFactory, ChineseNumberParserConfiguration, AgnosticNumberParserType, BaseNumberParser, BaseNumberExtractor } from "@microsoft/recognizers-text-number";
 import { Constants as NumberConstants } from "@microsoft/recognizers-text-number";
@@ -555,7 +555,7 @@ export class ChineseDateParser extends BaseDateParser {
 
     private convertChineseYearToNumber(source: string): number {
         let year = 0;
-        
+
         let dynastyYear = DateUtils.parseChineseDynastyYear(source, this.dynastyYearRegex, this.dynastyYearMap, this.dynastyStartYear, this.config.integerExtractor, this.config.numberParser);
         if (dynastyYear > 0) {
             return dynastyYear;

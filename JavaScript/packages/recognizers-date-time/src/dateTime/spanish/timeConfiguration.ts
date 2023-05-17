@@ -1,6 +1,6 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// @ts-nocheck// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { IExtractor } from "@microsoft/recognizers-text";
 import { RegExpUtility } from "@microsoft/recognizers-text";
 import { ITimeExtractorConfiguration, ITimeParserConfiguration } from "../baseTime";

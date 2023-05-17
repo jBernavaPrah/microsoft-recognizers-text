@@ -1,13 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ExtractResult, IExtractor, IParser, RegExpUtility } from "@microsoft/recognizers-text";
-import { Culture, CultureInfo, NumberMode, AgnosticNumberParserFactory, AgnosticNumberParserType, EnglishNumberExtractor, EnglishNumberParserConfiguration } from "@microsoft/recognizers-text-number";
-import { Constants } from "../constants";
-import { INumberWithUnitExtractorConfiguration } from "../extractors";
-import { BaseNumberWithUnitParserConfiguration } from "../parsers";
-import { EnglishNumericWithUnit } from "../../resources/englishNumericWithUnit";
-import { BaseUnits } from "../../resources/baseUnits";
+import { ExtractResult, IExtractor, IParser, RegExpUtility } from '@microsoft/recognizers-text';
+import {
+    Culture,
+    CultureInfo,
+    NumberMode,
+    AgnosticNumberParserFactory,
+    AgnosticNumberParserType,
+    EnglishNumberExtractor,
+    EnglishNumberParserConfiguration,
+} from '@microsoft/recognizers-text-number';
+import { Constants } from '../constants';
+import { INumberWithUnitExtractorConfiguration } from '../extractors';
+import { BaseNumberWithUnitParserConfiguration } from '../parsers';
+import { EnglishNumericWithUnit } from '../../resources/englishNumericWithUnit';
+import { BaseUnits } from '../../resources/baseUnits';
 
 export abstract class EnglishNumberWithUnitExtractorConfiguration implements INumberWithUnitExtractorConfiguration {
     abstract readonly suffixList: ReadonlyMap<string, string>;
@@ -22,7 +30,7 @@ export abstract class EnglishNumberWithUnitExtractorConfiguration implements INu
     readonly connectorToken: string;
     readonly compoundUnitConnectorRegex: RegExp;
     readonly nonUnitRegex: RegExp;
-    readonly ambiguousUnitNumberMultiplierRegex: RegExp;
+    readonly ambiguousUnitNumberMultiplierRegex!: RegExp;
 
     constructor(ci: CultureInfo) {
         this.cultureInfo = ci;

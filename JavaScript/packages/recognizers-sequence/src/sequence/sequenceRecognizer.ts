@@ -59,7 +59,7 @@ function recognizeByModel(getModelFunc: (n: SequenceRecognizer) => IModel, query
 
 
 export default class SequenceRecognizer extends Recognizer<SequenceOptions> {
-    constructor(culture: string, options: SequenceOptions = SequenceOptions.None, lazyInitialization: boolean = false) {
+    constructor(culture: string, options: SequenceOptions|number = SequenceOptions.None, lazyInitialization: boolean = false) {
         super(culture, options, lazyInitialization);
     }
 
@@ -99,31 +99,31 @@ export default class SequenceRecognizer extends Recognizer<SequenceOptions> {
         this.registerModel("GUIDModel", Culture.English, (options) => new GUIDModel(new GUIDParser(), new GUIDExtractor()));
     }
 
-    getPhoneNumberModel(culture: string = null, fallbackToDefaultCulture: boolean = true): IModel {
+    getPhoneNumberModel(culture: string|null = null, fallbackToDefaultCulture: boolean = true): IModel {
         return this.getModel("PhoneNumberModel", culture, fallbackToDefaultCulture);
     }
 
-    getIpAddressModel(culture: string = null, fallbackToDefaultCulture: boolean = true): IModel {
+    getIpAddressModel(culture: string|null = null, fallbackToDefaultCulture: boolean = true): IModel {
         return this.getModel("IpAddressModel", culture, fallbackToDefaultCulture);
     }
 
-    getMentionModel(culture: string = null, fallbackToDefaultCulture: boolean = true): IModel {
+    getMentionModel(culture: string|null = null, fallbackToDefaultCulture: boolean = true): IModel {
         return this.getModel("MentionModel", culture, fallbackToDefaultCulture);
     }
 
-    getHashtagModel(culture: string = null, fallbackToDefaultCulture: boolean = true): IModel {
+    getHashtagModel(culture: string|null = null, fallbackToDefaultCulture: boolean = true): IModel {
         return this.getModel("HashtagModel", culture, fallbackToDefaultCulture);
     }
 
-    getEmailModel(culture: string = null, fallbackToDefaultCulture: boolean = true): IModel {
+    getEmailModel(culture: string|null = null, fallbackToDefaultCulture: boolean = true): IModel {
         return this.getModel("EmailModel", culture, fallbackToDefaultCulture);
     }
 
-    getURLModel(culture: string = null, fallbackToDefaultCulture: boolean = true): IModel {
+    getURLModel(culture: string|null = null, fallbackToDefaultCulture: boolean = true): IModel {
         return this.getModel("URLModel", culture, fallbackToDefaultCulture);
     }
 
-    getGUIDModel(culture: string = null, fallbackToDefaultCulture: boolean = true): IModel {
+    getGUIDModel(culture: string|null = null, fallbackToDefaultCulture: boolean = true): IModel {
         return this.getModel("GUIDModel", culture, fallbackToDefaultCulture);
     }
-} 
+}

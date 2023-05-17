@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IExtractor, ExtractResult, RegExpUtility, Match, StringUtility } from "@microsoft/recognizers-text";
-import { Constants } from "./constants";
-import GraphemeSplitter = require("grapheme-splitter");
+import {IExtractor, ExtractResult, RegExpUtility, Match, StringUtility} from "@microsoft/recognizers-text";
+import {Constants} from "./constants";
+import GraphemeSplitter from "grapheme-splitter";
+
 const splitter = new GraphemeSplitter();
 
 export interface IChoiceExtractorConfiguration {
@@ -17,7 +18,7 @@ export interface IChoiceExtractorConfiguration {
 
 export class ChoiceExtractor implements IExtractor {
     private readonly config: IChoiceExtractorConfiguration;
-    protected extractType: string;
+    protected extractType: string | undefined;
 
     constructor(config: IChoiceExtractorConfiguration) {
         this.config = config;
@@ -25,26 +26,26 @@ export class ChoiceExtractor implements IExtractor {
 
     extract(source: string): ExtractResult[] {
         let results = new Array<ExtractResult>();
-        let trimmedSource = source.toLowerCase();
+        const trimmedSource = source.toLowerCase();
 
         if (StringUtility.isNullOrWhitespace(source)) {
             return results;
         }
 
-        let allMatches = new Array<Match>();
+        const allMatches = new Array<Match>();
         let partialResults = new Array<ExtractResult>();
-        let sourceTokens = this.tokenize(trimmedSource);
+        const sourceTokens = this.tokenize(trimmedSource);
 
         this.config.regexesMap.forEach((typeExtracted, regex) => {
             RegExpUtility.getMatches(regex, trimmedSource).forEach(match => {
-                let matchTokens = this.tokenize(match.value);
-                let topScore = sourceTokens
+                const matchTokens = this.tokenize(match.value);
+                const topScore = sourceTokens
                     .map((sToken, index) => this.matchValue(sourceTokens, matchTokens, index))
                     .reduce((top, value) => top = Math.max(top, value), 0.0);
                 if (topScore > 0.0) {
-                    let start = match.index;
-                    let length = match.length;
-                    let text = source.substr(start, length).trim();
+                    const start = match.index;
+                    const length = match.length;
+                    const text = source.substr(start, length).trim();
                     partialResults.push({
                         start: start,
                         length: length,
@@ -66,11 +67,10 @@ export class ChoiceExtractor implements IExtractor {
         partialResults = partialResults.sort((a, b) => a.start - b.start);
 
         if (this.config.onlyTopMatch) {
-            let topResult = partialResults.reduce((top, value) => top = top.data.score < value.data.score ? value : top, partialResults[0]);
+            const topResult = partialResults.reduce((top, value) => top = top.data.score < value.data.score ? value : top, partialResults[0]);
             topResult.data.otherMatches = partialResults.filter(r => r !== topResult);
             results.push(topResult);
-        }
-        else {
+        } else {
             results = partialResults;
         }
 
@@ -82,9 +82,9 @@ export class ChoiceExtractor implements IExtractor {
         let emojiSkinToneMatch = 0;
         let totalDeviation = 0;
         match.forEach(matchToken => {
-            let pos = source.indexOf(matchToken, startPos);
+            const pos = source.indexOf(matchToken, startPos);
             if (pos >= 0) {
-                let distance = matched > 0 ? pos - startPos : 0;
+                const distance = matched > 0 ? pos - startPos : 0;
                 if (distance <= this.config.maxDistance) {
                     matched++;
                     totalDeviation += distance;
@@ -95,22 +95,22 @@ export class ChoiceExtractor implements IExtractor {
         });
 
         let score = 0.0;
-        let emojiSkinToneLen = RegExpUtility.getMatches(this.config.emojiSkinToneRegex, source.join()).length;
+        const emojiSkinToneLen = RegExpUtility.getMatches(this.config.emojiSkinToneRegex, source.join()).length;
         if (matched > 0 && (matched === (match.length) || this.config.allowPartialMatch)) {
-            let completeness = matched / match.length;
-            let accuracy = completeness * (matched / (matched + totalDeviation));
-            let initialScore = accuracy * ((matched + emojiSkinToneMatch) / (source.length + emojiSkinToneLen));
+            const completeness = matched / match.length;
+            const accuracy = completeness * (matched / (matched + totalDeviation));
+            const initialScore = accuracy * ((matched + emojiSkinToneMatch) / (source.length + emojiSkinToneLen));
             score = 0.4 + (0.6 * initialScore);
         }
         return score;
     }
 
     private tokenize(source: string): string[] {
-        let tokens: string[] = [];
-        let chars = splitter.splitGraphemes(source);
+        const tokens: string[] = [];
+        const chars = splitter.splitGraphemes(source);
         let token = '';
         chars.forEach(c => {
-            let codePoint = c.codePointAt(0) || c.charAt(0);
+            const codePoint = (c.codePointAt(0) || c.charAt(0)) as number;
             if (codePoint > 0xFFFF) {
                 // Character is in a Supplementary Unicode Plane. This is where emoji live so
                 // we're going to just break each character in this range out as its own token.
@@ -119,11 +119,9 @@ export class ChoiceExtractor implements IExtractor {
                     tokens.push(token);
                     token = '';
                 }
-            }
-            else if (!(this.config.tokenRegex.test(c) || StringUtility.isWhitespace(c))) {
+            } else if (!(this.config.tokenRegex.test(c) || StringUtility.isWhitespace(c))) {
                 token = token.concat(c);
-            }
-            else if (!StringUtility.isNullOrWhitespace(token)) {
+            } else if (!StringUtility.isNullOrWhitespace(token)) {
                 tokens.push(token);
                 token = '';
             }
@@ -150,11 +148,11 @@ export class BooleanExtractor extends ChoiceExtractor {
     private static readonly booleanFalse = Constants.SYS_BOOLEAN_FALSE;
 
     constructor(config: IBooleanExtractorConfiguration) {
-        let regexesMap = new Map<RegExp, string>()
+        const regexesMap = new Map<RegExp, string>()
             .set(config.regexTrue, Constants.SYS_BOOLEAN_TRUE)
             .set(config.regexFalse, Constants.SYS_BOOLEAN_FALSE);
 
-        let optionsConfig: IChoiceExtractorConfiguration = {
+        const optionsConfig: IChoiceExtractorConfiguration = {
             regexesMap: regexesMap,
             tokenRegex: config.tokenRegex,
             allowPartialMatch: false,

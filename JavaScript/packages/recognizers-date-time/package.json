@@ -13,10 +13,13 @@
     "numex",
     "parser-library"
   ],
-  "main": "dist/recognizers-text-date-time.umd.js",
-  "module": "dist/recognizers-text-date-time.es5.js",
-  "typings": "dist/types/recognizers-text-date-time.d.ts",
-  "browser": "dist/recognizers-text-date-time.browser.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm5/index.js",
+  "es2015": "dist/esm2015/index.js",
+  "types": "dist/types/index.d.ts",
+  "browser": "dist/index.browser.js",
+  "sideEffects": false,
+  "files": ["dist"],
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/Recognizers-Text"
@@ -28,9 +31,14 @@
     "node": ">=10.3.0"
   },
   "scripts": {
-    "build-resources": "ts-node --project ../resource-generator/tsconfig.json ../resource-generator/ ../recognizers-date-time/resource-definitions.json",
-    "clean-build": "rimraf dist && rimraf compiled",
-    "prepare": "npm run build-resources && npm run clean-build && tsc && rollup -c"
+    "prebuild": "rimraf dist",
+    "build": "tsc -b tsconfig.build.cjs.json tsconfig.build.esm5.json tsconfig.build.esm2015.json tsconfig.build.types.json",
+    "watch": "tsc -b tsconfig.build.cjs.json tsconfig.build.esm5.json tsconfig.build.esm2015.json tsconfig.build.types.json --watch",
+    "prettier": "prettier -w -l src test package.json",
+    "eslint": "eslint src test --fix --ext .ts",
+    "rimraf": "rimraf dist",
+    "test": "jest --runInBand",
+    "build-resources": "ts-node --project ../resource-generator/tsconfig.json ../resource-generator/ ../recognizers-date-time/resource-definitions.json"
   },
   "dependencies": {
     "lodash.isequal": "^4.5.0",

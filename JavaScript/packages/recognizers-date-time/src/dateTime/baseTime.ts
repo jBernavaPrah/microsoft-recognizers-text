@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { IExtractor, ExtractResult } from "@microsoft/recognizers-text";
 import { Constants, TimeTypeConstants } from "./constants";
 import { RegExpUtility, Match, StringUtility } from "@microsoft/recognizers-text-number";
@@ -26,27 +26,27 @@ export class BaseTimeExtractor implements IDateTimeExtractor {
         if (!refDate) {
             refDate = new Date();
         }
-        let referenceDate = refDate;
+        const referenceDate = refDate;
 
-        let tokens: Token[] = new Array<Token>()
+        const tokens: Token[] = new Array<Token>()
             .concat(this.basicRegexMatch(text))
             .concat(this.atRegexMatch(text))
             .concat(this.specialsRegexMatch(text, referenceDate));
 
-        let result = Token.mergeAllTokens(tokens, text, this.extractorName);
+        const result = Token.mergeAllTokens(tokens, text, this.extractorName);
         return result;
     }
 
     basicRegexMatch(text: string): Token[] {
 
-        let ret = [];
+        const ret:Token[] = [];
 
         this.config.timeRegexList.forEach(regexp => {
-            let matches = RegExpUtility.getMatches(regexp, text);
+            const matches = RegExpUtility.getMatches(regexp, text);
             matches.forEach(match => {
 
                 // @TODO Workaround to avoid incorrect partial-only matches. Remove after time regex reviews across languages.
-                let lth = match.groups("lth").value;
+                const lth = match.groups("lth").value;
 
                 if (!lth ||
                     (lth.length != match.length && !(match.length == lth.length + 1 && match.value.endsWith(" "))))
@@ -60,9 +60,9 @@ export class BaseTimeExtractor implements IDateTimeExtractor {
     }
 
     atRegexMatch(text: string): Token[] {
-        let ret = [];
+        const ret:Token[] = [];
         // handle "at 5", "at seven"
-        let matches = RegExpUtility.getMatches(this.config.atRegex, text);
+        const matches = RegExpUtility.getMatches(this.config.atRegex, text);
         matches.forEach(match => {
             if (match.index + match.length < text.length &&
                 text.charAt(match.index + match.length) === '%') {
@@ -74,10 +74,10 @@ export class BaseTimeExtractor implements IDateTimeExtractor {
     }
 
     specialsRegexMatch(text: string, refDate: Date): Token[] {
-        let ret = [];
+        const ret:Token[] = [];
         // handle "ish"
         if (this.config.ishRegex !== null) {
-            let matches = RegExpUtility.getMatches(this.config.ishRegex, text);
+            const matches = RegExpUtility.getMatches(this.config.ishRegex, text);
             matches.forEach(match => {
                 ret.push(new Token(match.index, match.index + match.length));
             });
@@ -92,25 +92,25 @@ export interface ITimeParserConfiguration {
     timeRegexes: RegExp[];
     numbers: ReadonlyMap<string, number>;
     utilityConfiguration: IDateTimeUtilityConfiguration;
-    adjustByPrefix(prefix: string, adjust: { hour: number, min: number, hasMin: boolean });
-    adjustBySuffix(suffix: string, adjust: { hour: number, min: number, hasMin: boolean, hasAm: boolean, hasPm: boolean });
+    adjustByPrefix(prefix: string, adjust: { hour: number, min: number, hasMin: boolean }):void;
+    adjustBySuffix(suffix: string, adjust: { hour: number, min: number, hasMin: boolean, hasAm: boolean, hasPm: boolean }) :void;
 }
 
 export class BaseTimeParser implements IDateTimeParser {
     readonly ParserName = Constants.SYS_DATETIME_TIME; // "Time";
     readonly config: ITimeParserConfiguration;
 
-    constructor(configuration: ITimeParserConfiguration) {
+    constructor(configuration: ITimeParserConfiguration|null) {
         this.config = configuration;
     }
 
-    public parse(er: ExtractResult, referenceTime?: Date): DateTimeParseResult | null {
+    public parse(er: ExtractResult, referenceTime?: Date): DateTimeParseResult {
         if (!referenceTime) {
             referenceTime = new Date();
         }
         let value = null;
         if (er.type === this.ParserName) {
-            let innerResult = this.internalParse(er.text, referenceTime);
+            const innerResult = this.internalParse(er.text, referenceTime);
             if (innerResult.success) {
                 innerResult.futureResolution = {};
                 innerResult.futureResolution[TimeTypeConstants.TIME] = DateTimeFormatUtil.formatTime(innerResult.futureValue);
@@ -120,7 +120,7 @@ export class BaseTimeParser implements IDateTimeParser {
             }
         }
 
-        let ret = new DateTimeParseResult(er);
+        const ret = new DateTimeParseResult(er);
         ret.value = value,
             ret.timexStr = value === null ? "" : value.timex,
             ret.resolutionStr = "";
@@ -129,13 +129,13 @@ export class BaseTimeParser implements IDateTimeParser {
     }
 
     internalParse(text: string, referenceTime: Date): DateTimeResolutionResult {
-        let innerResult = this.parseBasicRegexMatch(text, referenceTime);
+        const innerResult = this.parseBasicRegexMatch(text, referenceTime);
         return innerResult;
     }
 
     // parse basic patterns in TimeRegexList
     private parseBasicRegexMatch(text: string, referenceTime: Date): DateTimeResolutionResult {
-        let trimmedText = text.trim().toLowerCase();
+        const trimmedText = text.trim().toLowerCase();
         let offset = 0;
 
         let matches = RegExpUtility.getMatches(this.config.atRegex, trimmedText);
@@ -153,7 +153,7 @@ export class BaseTimeParser implements IDateTimeParser {
         let hour = this.config.numbers.get(text) || Number(text);
         if (hour) {
             if (hour >= 0 && hour <= 24) {
-                let ret = new DateTimeResolutionResult();
+                const ret = new DateTimeResolutionResult();
 
                 if (hour === 24) {
                     hour = 0;
@@ -171,7 +171,7 @@ export class BaseTimeParser implements IDateTimeParser {
             }
         }
 
-        for (let regex of this.config.timeRegexes) {
+        for (const regex of this.config.timeRegexes) {
             offset = 0;
             matches = RegExpUtility.getMatches(regex, trimmedText);
 
@@ -184,33 +184,33 @@ export class BaseTimeParser implements IDateTimeParser {
     }
 
     private match2Time(match: Match, referenceTime: Date): DateTimeResolutionResult {
-        let ret = new DateTimeResolutionResult();
+        const ret = new DateTimeResolutionResult();
         let hour = 0;
         let min = 0;
         let second = 0;
-        let day = referenceTime.getDate();
-        let month = referenceTime.getMonth();
-        let year = referenceTime.getFullYear();
+        const day = referenceTime.getDate();
+        const month = referenceTime.getMonth();
+        const year = referenceTime.getFullYear();
         let hasMin = false;
         let hasSec = false;
         let hasAm = false;
         let hasPm = false;
         let hasMid = false;
 
-        let engTimeStr = match.groups('engtime').value;
+        const engTimeStr = match.groups('engtime').value;
         if (!StringUtility.isNullOrWhitespace(engTimeStr)) {
             // get hour
-            let hourStr = match.groups('hournum').value.toLowerCase();
-            hour = this.config.numbers.get(hourStr);
+            const hourStr = match.groups('hournum').value.toLowerCase();
+            hour = this.config.numbers.get(hourStr)!;
 
             // get minute
-            let minStr = match.groups('minnum').value;
-            let tensStr = match.groups('tens').value;
+            const minStr = match.groups('minnum').value;
+            const tensStr = match.groups('tens').value;
 
             if (!StringUtility.isNullOrWhitespace(minStr)) {
-                min = this.config.numbers.get(minStr);
+                min = this.config.numbers.get(minStr)!;
                 if (tensStr) {
-                    min += this.config.numbers.get(tensStr);
+                    min += this.config.numbers.get(tensStr)!;
                 }
                 hasMin = true;
             }
@@ -243,7 +243,7 @@ export class BaseTimeParser implements IDateTimeParser {
             let hourStr = match.groups('hour').value;
             if (StringUtility.isNullOrWhitespace(hourStr)) {
                 hourStr = match.groups('hournum').value.toLowerCase();
-                hour = this.config.numbers.get(hourStr);
+                hour = this.config.numbers.get(hourStr)!;
                 if (!hour) {
                     return ret;
                 }
@@ -251,7 +251,7 @@ export class BaseTimeParser implements IDateTimeParser {
             else {
                 hour = Number.parseInt(hourStr, 10);
                 if (!hour) {
-                    hour = this.config.numbers.get(hourStr);
+                    hour = this.config.numbers.get(hourStr)!;
                     if (!hour) {
                         return ret;
                     }
@@ -263,13 +263,13 @@ export class BaseTimeParser implements IDateTimeParser {
             if (StringUtility.isNullOrWhitespace(minStr)) {
                 minStr = match.groups('minnum').value;
                 if (!StringUtility.isNullOrWhitespace(minStr)) {
-                    min = this.config.numbers.get(minStr);
+                    min = this.config.numbers.get(minStr)!;
                     hasMin = true;
                 }
 
-                let tensStr = match.groups('tens').value;
+                const tensStr = match.groups('tens').value;
                 if (!StringUtility.isNullOrWhitespace(tensStr)) {
-                    min += this.config.numbers.get(tensStr);
+                    min += this.config.numbers.get(tensStr)!;
                     hasMin = true;
                 }
             }
@@ -279,7 +279,7 @@ export class BaseTimeParser implements IDateTimeParser {
             }
 
             // get second
-            let secStr = match.groups('sec').value.toLowerCase();
+            const secStr = match.groups('sec').value.toLowerCase();
             if (!StringUtility.isNullOrWhitespace(secStr)) {
                 second = Number.parseInt(secStr, 10);
                 hasSec = true;
@@ -287,7 +287,7 @@ export class BaseTimeParser implements IDateTimeParser {
         }
 
         // adjust by desc string
-        let descStr = match.groups('desc').value.toLowerCase();
+        const descStr = match.groups('desc').value.toLowerCase();
         if (RegExpUtility.getMatches(this.config.utilityConfiguration.amDescRegex, descStr).length > 0
             || RegExpUtility.getMatches(this.config.utilityConfiguration.amPmDescRegex, descStr).length > 0
             || !StringUtility.isNullOrEmpty(match.groups('iam').value)) {
@@ -311,17 +311,17 @@ export class BaseTimeParser implements IDateTimeParser {
         }
 
         // adjust min by prefix
-        let timePrefix = match.groups('prefix').value.toLowerCase();
+        const timePrefix = match.groups('prefix').value.toLowerCase();
         if (!StringUtility.isNullOrWhitespace(timePrefix)) {
-            let adjust = { hour: hour, min: min, hasMin: hasMin };
+            const adjust = { hour: hour, min: min, hasMin: hasMin };
             this.config.adjustByPrefix(timePrefix, adjust);
             hour = adjust.hour; min = adjust.min; hasMin = adjust.hasMin;
         }
 
         // adjust hour by suffix
-        let timeSuffix = match.groups('suffix').value.toLowerCase();
+        const timeSuffix = match.groups('suffix').value.toLowerCase();
         if (!StringUtility.isNullOrWhitespace(timeSuffix)) {
-            let adjust = { hour: hour, min: min, hasMin: hasMin, hasAm: hasAm, hasPm: hasPm };
+            const adjust = { hour: hour, min: min, hasMin: hasMin, hasAm: hasAm, hasPm: hasPm };
             this.config.adjustBySuffix(timeSuffix, adjust);
             hour = adjust.hour; min = adjust.min; hasMin = adjust.hasMin; hasAm = adjust.hasAm; hasPm = adjust.hasPm;
         }

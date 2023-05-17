@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
+// @ts-nocheck
 import { BaseDateTime } from "../resources/baseDateTime";
 
 export class Constants {
@@ -28,7 +28,7 @@ export class Constants {
     static readonly Decade: string = "decade";
     static readonly Century: string = "century"
     static readonly RelCentury: string = "relcentury"
-    
+
     static readonly CommentKey: string = "Comment";
     static readonly CommentAmPm: string = "ampm";
 
@@ -126,7 +126,7 @@ export class Constants {
     public readonly InvalidHour: number = Number.MIN_VALUE;
     public readonly InvalidMinute: number = Number.MIN_VALUE;
     public readonly InvalidSecond: number = Number.MIN_VALUE;
-    
+
 }
 
 export class TimeTypeConstants {

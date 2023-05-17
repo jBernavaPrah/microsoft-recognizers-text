@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IParser, ParseResult, ExtractResult } from "@microsoft/recognizers-text";
-import { CultureInfo, Culture } from "../culture";
-import { Constants } from "./constants";
-import trimEnd = require("lodash.trimend");
-import sortBy = require("lodash.sortby");
-import { RegExpUtility } from "@microsoft/recognizers-text";
-import { BigNumber } from 'bignumber.js/bignumber';
+import { IParser, ParseResult, ExtractResult } from '@microsoft/recognizers-text';
+import { CultureInfo } from '../culture';
+import trimEnd from 'lodash.trimend';
+import sortBy from  'lodash.sortby';
+import { RegExpUtility } from '@microsoft/recognizers-text';
+import { BigNumber } from 'bignumber.js';
 
 // The exponent value(s) at which toString returns exponential notation.
 BigNumber.config({ EXPONENTIAL_AT: [-5, 15] });
@@ -20,7 +19,7 @@ export interface INumberParserConfiguration {
     readonly digitalNumberRegex: RegExp;
     readonly fractionMarkerToken: string;
     readonly negativeNumberSignRegex: RegExp;
-    readonly halfADozenRegex: RegExp;
+    readonly halfADozenRegex: RegExp | null;
     readonly halfADozenText: string;
     readonly langMarker: string;
     readonly nonDecimalSeparatorChar: string;
@@ -32,6 +31,7 @@ export interface INumberParserConfiguration {
     readonly writtenFractionSeparatorTexts: readonly string[];
 
     normalizeTokenSet(tokens: readonly string[], context: ParseResult): readonly string[];
+
     resolveCompositeNumber(numberStr: string): number;
 }
 
@@ -41,18 +41,18 @@ export class BaseNumberParser implements IParser {
     protected readonly arabicNumberRegex: RegExp;
     protected readonly roundNumberSet: Set<string>;
 
-    supportedTypes: readonly string[];
+    supportedTypes!: readonly string[];
 
     constructor(config: INumberParserConfiguration) {
         this.config = config;
 
-        let singleIntFrac = `${this.config.wordSeparatorToken}| -|${this.getKeyRegex(this.config.cardinalNumberMap)}|${this.getKeyRegex(this.config.ordinalNumberMap)}`;
+        const singleIntFrac = `${this.config.wordSeparatorToken}| -|${this.getKeyRegex(this.config.cardinalNumberMap)}|${this.getKeyRegex(this.config.ordinalNumberMap)}`;
 
-        this.textNumberRegex = RegExpUtility.getSafeRegExp(String.raw`(?=\b)(${singleIntFrac})(?=\b)`, "gis");
-        this.arabicNumberRegex = RegExpUtility.getSafeRegExp(String.raw`\d+`, "is");
+        this.textNumberRegex = RegExpUtility.getSafeRegExp(String.raw`(?=\b)(${singleIntFrac})(?=\b)`, 'gis');
+        this.arabicNumberRegex = RegExpUtility.getSafeRegExp(String.raw`\d+`, 'is');
         this.roundNumberSet = new Set<string>();
         this.config.roundNumberMap.forEach((value, key) =>
-            this.roundNumberSet.add(key)
+            this.roundNumberSet.add(key),
         );
     }
 
@@ -67,7 +67,7 @@ export class BaseNumberParser implements IParser {
         let extra = extResult.data as string;
         if (!extra) {
             if (this.arabicNumberRegex.test(extResult.text)) {
-                extra = "Num";
+                extra = 'Num';
             }
             else {
                 extra = this.config.langMarker;
@@ -76,14 +76,14 @@ export class BaseNumberParser implements IParser {
 
         // Resolve symbol prefix
         let isNegative = false;
-        let matchNegative = extResult.text.match(this.config.negativeNumberSignRegex);
+        const matchNegative = extResult.text.match(this.config.negativeNumberSignRegex);
 
         if (matchNegative) {
             isNegative = true;
             extResult.text = extResult.text.substr(matchNegative[1].length);
         }
 
-        if (extra.includes("Num")) {
+        if (extra.includes('Num')) {
             ret = this.digitNumberParse(extResult);
         }
         else if (extra.includes(`Frac${this.config.langMarker}`)) // Frac is a special number, parse via another method
@@ -93,16 +93,16 @@ export class BaseNumberParser implements IParser {
         else if (extra.includes(this.config.langMarker)) {
             ret = this.textNumberParse(extResult);
         }
-        else if (extra.includes("Pow")) {
+        else if (extra.includes('Pow')) {
             ret = this.powerNumberParse(extResult);
         }
 
         if (ret && ret.value !== null) {
             if (isNegative) {
                 // Recover to the original extracted Text
-                ret.text = matchNegative[1] + extResult.text;
+                ret.text = matchNegative![1] + extResult.text;
                 // Check if ret.value is a BigNumber
-                if (typeof ret.value === "number") {
+                if (typeof ret.value === 'number') {
                     ret.value = -ret.value;
                 }
                 else {
@@ -121,18 +121,19 @@ export class BaseNumberParser implements IParser {
     }
 
     protected getKeyRegex(regexMap: ReadonlyMap<string, number>): string {
-        let keys = new Array<string>();
+        const keys = new Array<string>();
         regexMap.forEach((value, key) => keys.push(key));
-        let sortKeys = sortBy(keys, key => key.length).reverse();
+        const sortKeys = sortBy(keys, key => key.length).reverse();
         return sortKeys.join('|');
     }
 
     protected digitNumberParse(extResult: ExtractResult): ParseResult {
-        let result: ParseResult = {
+        const result: ParseResult = {
             start: extResult.start,
             length: extResult.length,
             text: extResult.text,
-            type: extResult.type
+            type: extResult.type,
+            metaData: null
         };
 
         // [1] 24
@@ -148,22 +149,22 @@ export class BaseNumberParser implements IParser {
         let startIndex = 0;
         let handle = extResult.text.toLowerCase();
 
-        let matches = RegExpUtility.getMatches(this.config.digitalNumberRegex, handle);
+        const matches = RegExpUtility.getMatches(this.config.digitalNumberRegex, handle);
         if (matches) {
             matches.forEach(match => {
                 // HACK: Matching regex may be buggy, may include a digit before the unit
                 match.value = match.value.replace(/\d/g, '');
-                match.length = match.value.length;
+                const length = match.value.length;
 
-                let rep: number = this.config.roundNumberMap.get(match.value) as number;
+                const rep: number = this.config.roundNumberMap.get(match.value) as number;
                 // \\s+ for filter the spaces.
                 power *= rep;
 
                 // tslint:disable-next-line:no-conditional-assignment
                 while ((tmpIndex = handle.indexOf(match.value, startIndex)) >= 0) {
-                    let front = trimEnd(handle.substring(0, tmpIndex));
+                    const front = trimEnd(handle.substring(0, tmpIndex));
                     startIndex = front.length;
-                    handle = front + handle.substring(tmpIndex + match.length);
+                    handle = front + handle.substring(tmpIndex + length);
                 }
             });
         }
@@ -180,33 +181,33 @@ export class BaseNumberParser implements IParser {
 
     protected fracLikeNumberParse(extResult: ExtractResult): ParseResult {
 
-        let result =
+        const result =
             {
                 start: extResult.start,
                 length: extResult.length,
                 text: extResult.text,
-                type: extResult.type
+                type: extResult.type,
             } as ParseResult;
 
-        let resultText = extResult.text.toLowerCase();
+        const resultText = extResult.text.toLowerCase();
         if (resultText.includes(this.config.fractionMarkerToken)) {
-            let overIndex = resultText.indexOf(this.config.fractionMarkerToken);
-            let smallPart = resultText.substring(0, overIndex).trim();
-            let bigPart = resultText.substring(overIndex + this.config.fractionMarkerToken.length, resultText.length).trim();
+            const overIndex = resultText.indexOf(this.config.fractionMarkerToken);
+            const smallPart = resultText.substring(0, overIndex).trim();
+            const bigPart = resultText.substring(overIndex + this.config.fractionMarkerToken.length, resultText.length).trim();
 
-            let smallValue = this.isDigit(smallPart[0])
+            const smallValue = this.isDigit(smallPart[0])
                 ? this.getDigitalValue(smallPart, 1)
                 : this.getIntValue(this.getMatches(smallPart));
 
-            let bigValue = this.isDigit(bigPart[0])
+            const bigValue = this.isDigit(bigPart[0])
                 ? this.getDigitalValue(bigPart, 1)
                 : this.getIntValue(this.getMatches(bigPart));
 
             result.value = smallValue / bigValue;
         }
         else {
-            let words = resultText.split(" ").filter(s => s && s.length);
-            let fracWords = Array.from(this.config.normalizeTokenSet(words, result));
+            const words = resultText.split(' ').filter(s => s && s.length);
+            const fracWords = Array.from(this.config.normalizeTokenSet(words, result));
 
             // Split fraction with integer
             let splitIndex = fracWords.length - 1;
@@ -225,10 +226,10 @@ export class BaseNumberParser implements IParser {
                     continue;
                 }
 
-                let previousValue = currentValue;
+                const previousValue = currentValue;
                 currentValue = this.config.resolveCompositeNumber(fracWords[splitIndex]);
 
-                let smHundreds = 100;
+                const smHundreds = 100;
 
                 // previous : hundred
                 // current : one
@@ -264,12 +265,12 @@ export class BaseNumberParser implements IParser {
                 break;
             }
 
-            let fracPart = new Array<string>();
+            const fracPart = new Array<string>();
             for (let i = splitIndex; i < fracWords.length; i++) {
-                if (fracWords[i].indexOf("-") > -1) {
-                    let split = fracWords[i].split('-');
+                if (fracWords[i].indexOf('-') > -1) {
+                    const split = fracWords[i].split('-');
                     fracPart.push(split[0]);
-                    fracPart.push("-");
+                    fracPart.push('-');
                     fracPart.push(split[1]);
                 }
                 else {
@@ -280,7 +281,7 @@ export class BaseNumberParser implements IParser {
             fracWords.splice(splitIndex, fracWords.length - splitIndex);
 
             // denomi = denominator
-            let denomiValue = this.getIntValue(fracPart);
+            const denomiValue = this.getIntValue(fracPart);
             // Split mixed number with fraction
             let numerValue = 0;
             let intValue = 0;
@@ -288,14 +289,14 @@ export class BaseNumberParser implements IParser {
             let mixedIndex = fracWords.length;
             for (let i = fracWords.length - 1; i >= 0; i--) {
                 if (i < fracWords.length - 1 && this.config.writtenFractionSeparatorTexts.indexOf(fracWords[i]) > -1) {
-                    let numerStr = fracWords.slice(i + 1, fracWords.length).join(" ");
+                    const numerStr = fracWords.slice(i + 1, fracWords.length).join(' ');
                     numerValue = this.getIntValue(this.getMatches(numerStr));
                     mixedIndex = i + 1;
                     break;
                 }
             }
 
-            let intStr = fracWords.slice(0, mixedIndex).join(" ");
+            const intStr = fracWords.slice(0, mixedIndex).join(' ');
             intValue = this.getIntValue(this.getMatches(intStr));
 
             // Find mixed number
@@ -313,33 +314,33 @@ export class BaseNumberParser implements IParser {
     }
 
     protected textNumberParse(extResult: ExtractResult): ParseResult {
-        let result =
+        const result =
             {
                 start: extResult.start,
                 length: extResult.length,
                 text: extResult.text,
-                type: extResult.type
+                type: extResult.type,
             } as ParseResult;
 
         let handle = extResult.text.toLowerCase();
 
-        handle = handle.replace(this.config.halfADozenRegex, this.config.halfADozenText);
+        handle = handle.replace(this.config.halfADozenRegex!, this.config.halfADozenText);
 
-        let numGroup = this.splitMulti(handle, Array.from(this.config.writtenDecimalSeparatorTexts)).filter(s => s && s.length > 0);
+        const numGroup = this.splitMulti(handle, Array.from(this.config.writtenDecimalSeparatorTexts)).filter(s => s && s.length > 0);
 
-        let intPart = numGroup[0];
+        const intPart = numGroup[0];
 
-        let matchStrs = (intPart && intPart.match(this.textNumberRegex))
-            ? intPart.match(this.textNumberRegex).map(s => s.toLowerCase())
+        const matchStrs = (intPart && intPart.match(this.textNumberRegex))
+            ? intPart.match(this.textNumberRegex)!.map(s => s.toLowerCase())
             : new Array<string>();
 
         // Get the value recursively
-        let intPartRet = this.getIntValue(matchStrs);
+        const intPartRet = this.getIntValue(matchStrs);
 
         let pointPartRet = 0;
         if (numGroup.length === 2) {
-            let pointPart = numGroup[1];
-            let matchStrs = pointPart.match(this.textNumberRegex).map(s => s.toLowerCase());
+            const pointPart = numGroup[1];
+            const matchStrs = pointPart.match(this.textNumberRegex)!.map(s => s.toLowerCase());
             pointPartRet += this.getPointValue(matchStrs);
         }
 
@@ -349,27 +350,27 @@ export class BaseNumberParser implements IParser {
     }
 
     protected powerNumberParse(extResult: ExtractResult): ParseResult {
-        let result =
+        const result =
             {
                 start: extResult.start,
                 length: extResult.length,
                 text: extResult.text,
-                type: extResult.type
+                type: extResult.type,
             } as ParseResult;
 
-        let handle = extResult.text.toUpperCase();
-        let isE = !extResult.text.includes("^");
+        const handle = extResult.text.toUpperCase();
+        const isE = !extResult.text.includes('^');
 
         // [1] 1e10
         // [2] 1.1^-23
-        let calStack = new Array<BigNumber>();
+        const calStack = new Array<BigNumber>();
 
         let scale = new BigNumber(10);
         let dot = false;
         let isNegative = false;
         let tmp = new BigNumber(0);
         for (let i = 0; i < handle.length; i++) {
-            let ch = handle[i];
+            const ch = handle[i];
             if (ch === '^' || ch === 'E') {
                 if (isNegative) {
                     calStack.push(tmp.negated());
@@ -418,10 +419,10 @@ export class BaseNumberParser implements IParser {
         let ret = 0;
         if (isE) {
             // ret = calStack.shift() * Math.pow(10, calStack.shift());
-            ret = calStack.shift().times(Math.pow(10, calStack.shift().toNumber())).toNumber();
+            ret = calStack.shift()!.times(Math.pow(10, calStack.shift()!.toNumber())).toNumber();
         }
         else {
-            ret = Math.pow(calStack.shift().toNumber(), calStack.shift().toNumber());
+            ret = Math.pow(calStack.shift()!.toNumber(), calStack.shift()!.toNumber());
         }
 
         result.value = ret;
@@ -431,7 +432,7 @@ export class BaseNumberParser implements IParser {
     }
 
     private splitMulti(str: string, tokens: string[]): string[] {
-        let tempChar = tokens[0]; // We can use the first token as a temporary join character
+        const tempChar = tokens[0]; // We can use the first token as a temporary join character
         for (let i = 0; i < tokens.length; i++) {
             str = str.split(tokens[i]).join(tempChar);
         }
@@ -439,7 +440,7 @@ export class BaseNumberParser implements IParser {
     }
 
     private getMatches(input: string): string[] {
-        let matches = input.match(this.textNumberRegex);
+        const matches = input.match(this.textNumberRegex);
         return (matches || []).map(match => {
             return match.toLowerCase();
         });
@@ -448,7 +449,7 @@ export class BaseNumberParser implements IParser {
     // Test if big and combine with small.
     // e.g. "hundred" can combine with "thirty" but "twenty" can't combine with "thirty".
     private isComposable(big: number, small: number): boolean {
-        let baseNumber = small > 10 ? 100 : 10;
+        const baseNumber = small > 10 ? 100 : 10;
 
         if (big % baseNumber === 0 && big / baseNumber >= 1) {
             return true;
@@ -458,7 +459,7 @@ export class BaseNumberParser implements IParser {
     }
 
     private getIntValue(matchStrs: string[]): number {
-        let isEnd = new Array<boolean>(matchStrs.length);
+        const isEnd = new Array<boolean>(matchStrs.length);
         for (let i = 0; i < isEnd.length; i++) {
             isEnd[i] = false;
         }
@@ -468,44 +469,45 @@ export class BaseNumberParser implements IParser {
 
         // Scan from end to start, find the end word
         for (let i = matchStrs.length - 1; i >= 0; i--) {
+            // todo: seems a typo here. roundNumberSet instead of roundNumberMap
             if (this.roundNumberSet.has(matchStrs[i])) {
                 // if false,then continue
                 // You will meet hundred first, then thousand.
-                if (endFlag > this.config.roundNumberMap.get(matchStrs[i])) {
+                if (endFlag > this.config.roundNumberMap.get(matchStrs[i])!) {
                     continue;
                 }
                 isEnd[i] = true;
-                endFlag = this.config.roundNumberMap.get(matchStrs[i]);
+                endFlag = this.config.roundNumberMap.get(matchStrs[i])!;
             }
         }
 
         if (endFlag === 1) {
-            let tempStack = new Array<number>();
-            let oldSym = "";
+            const tempStack = new Array<number>();
+            let oldSym = '';
             matchStrs.forEach(matchStr => {
-                let isCardinal = this.config.cardinalNumberMap.has(matchStr);
-                let isOrdinal = this.config.ordinalNumberMap.has(matchStr);
+                const isCardinal = this.config.cardinalNumberMap.has(matchStr);
+                const isOrdinal = this.config.ordinalNumberMap.has(matchStr);
                 if (isCardinal || isOrdinal) {
-                    let matchValue = isCardinal
-                        ? this.config.cardinalNumberMap.get(matchStr)
-                        : this.config.ordinalNumberMap.get(matchStr);
+                    const matchValue = isCardinal
+                        ? this.config.cardinalNumberMap.get(matchStr)!
+                        : this.config.ordinalNumberMap.get(matchStr)!;
 
                     // This is just for ordinal now. Not for fraction ever.
                     if (isOrdinal) {
-                        let fracPart = this.config.ordinalNumberMap.get(matchStr);
+                        const fracPart = this.config.ordinalNumberMap.get(matchStr)!;
                         if (tempStack.length > 0) {
-                            let intPart = tempStack.pop();
+                            let intPart = tempStack.pop()!;
                             // if intPart >= fracPart, it means it is an ordinal number
                             // it begins with an integer, ends with an ordinal
                             // e.g. ninety-ninth
                             if (intPart >= fracPart) {
                                 tempStack.push(intPart + fracPart);
                             }
-                            // another case of the type is ordinal
+                                // another case of the type is ordinal
                             // e.g. three hundredth
                             else {
                                 while (tempStack.length > 0) {
-                                    intPart = intPart + tempStack.pop();
+                                    intPart = intPart + tempStack.pop()!;
                                 }
                                 tempStack.push(intPart * fracPart);
                             }
@@ -515,22 +517,22 @@ export class BaseNumberParser implements IParser {
                         }
                     }
                     else if (this.config.cardinalNumberMap.has(matchStr)) {
-                        if (oldSym === "-") {
-                            let sum = tempStack.pop() + matchValue;
+                        if (oldSym === '-') {
+                            const sum = tempStack.pop()! + matchValue;
                             tempStack.push(sum);
                         }
                         else if (oldSym === this.config.writtenIntegerSeparatorTexts[0] || tempStack.length < 2) {
                             tempStack.push(matchValue);
                         }
                         else if (tempStack.length >= 2) {
-                            let sum = tempStack.pop() + matchValue;
-                            sum = tempStack.pop() + sum;
+                            let sum = tempStack.pop()! + matchValue;
+                            sum = tempStack.pop()! + sum;
                             tempStack.push(sum);
                         }
                     }
                 }
                 else {
-                    let complexValue = this.config.resolveCompositeNumber(matchStr);
+                    const complexValue = this.config.resolveCompositeNumber(matchStr);
                     if (complexValue !== 0) {
                         tempStack.push(complexValue);
                     }
@@ -548,7 +550,7 @@ export class BaseNumberParser implements IParser {
             let partValue = 1;
             for (let i = 0; i < isEnd.length; i++) {
                 if (isEnd[i]) {
-                    mulValue = this.config.roundNumberMap.get(matchStrs[i]);
+                    mulValue = this.config.roundNumberMap.get(matchStrs[i])!;
                     partValue = 1;
 
                     if (i !== 0) {
@@ -573,18 +575,19 @@ export class BaseNumberParser implements IParser {
 
     private getPointValue(matchStrs: string[]): number {
         let ret = 0;
-        let firstMatch = matchStrs[0];
+        const firstMatch = matchStrs[0];
 
-        if (this.config.cardinalNumberMap.has(firstMatch) && this.config.cardinalNumberMap.get(firstMatch) >= 10) {
-            let prefix = "0.";
-            let tempInt = this.getIntValue(matchStrs);
-            let all = prefix + tempInt;
+        if (this.config.cardinalNumberMap.has(firstMatch) && this.config.cardinalNumberMap.get(firstMatch)! >= 10) {
+            const prefix = '0.';
+            const tempInt = this.getIntValue(matchStrs);
+            const all = prefix + tempInt;
             ret = parseFloat(all);
         }
         else {
             let scale = new BigNumber(0.1);
             for (let i = 0; i < matchStrs.length; i++) {
-                ret += scale.times(this.config.cardinalNumberMap.get(matchStrs[i])).toNumber();
+                // todo: Code assume the cardinalNumberMap has matchStrs[i]
+                ret += scale.times(this.config.cardinalNumberMap.get(matchStrs[i])!).toNumber();
                 // scale *= 0.1;
                 scale = scale.times(0.1);
             }
@@ -593,13 +596,13 @@ export class BaseNumberParser implements IParser {
         return ret;
     }
 
-    private skipNonDecimalSeparator(ch: string, distance: number, culture: CultureInfo) {
-        let decimalLength = 3;
+    private skipNonDecimalSeparator(ch: string, distance: number, culture: CultureInfo): boolean {
+        const decimalLength = 3;
 
         // Special cases for multi-language countries where decimal separators can be used interchangeably. Mostly informally.
         // Ex: South Africa, Namibia; Puerto Rico in ES; or in Canada for EN and FR.
         // "me pidio $5.00 prestados" and "me pidio $5,00 prestados" -> currency $5
-        let cultureRegex = RegExpUtility.getSafeRegExp(String.raw`^(en|es|fr)(-)?\b`, "is");
+        const cultureRegex = RegExpUtility.getSafeRegExp(String.raw`^(en|es|fr)(-)?\b`, 'is');
 
         return (ch == this.config.nonDecimalSeparatorChar && !(distance <= decimalLength && (cultureRegex.exec(culture.code) !== null)));
     }
@@ -608,16 +611,16 @@ export class BaseNumberParser implements IParser {
         let tmp = new BigNumber(0);
         let scale = new BigNumber(10);
         let decimalSeparator = false;
-        let strLength = digitsStr.length;
+        const strLength = digitsStr.length;
         let isNegative = false;
-        let isFrac = digitsStr.includes('/');
+        const isFrac = digitsStr.includes('/');
 
-        let calStack = new Array<BigNumber>();
+        const calStack = new Array<BigNumber>();
 
         for (let i = 0; i < digitsStr.length; i++) {
 
-            let ch = digitsStr[i];
-            let skippableNonDecimal = this.skipNonDecimalSeparator(ch, strLength - i, this.config.cultureInfo);
+            const ch = digitsStr[i];
+            const skippableNonDecimal = this.skipNonDecimalSeparator(ch, strLength - i, this.config.cultureInfo);
 
             if (!isFrac && (ch === ' ' || skippableNonDecimal)) {
                 continue;
@@ -651,15 +654,16 @@ export class BaseNumberParser implements IParser {
 
         // if the number is a fraction.
         let calResult = new BigNumber(0);
+        // todo: the code assume the calStack return at least 2 values here.
         if (isFrac) {
-            let deno = calStack.pop();
-            let mole = calStack.pop();
+            const deno = calStack.pop()!;
+            const mole = calStack.pop()!;
             // calResult += mole / deno;
             calResult = calResult.plus(mole.dividedBy(deno));
         }
 
         while (calStack.length > 0) {
-            calResult = calResult.plus(calStack.pop());
+            calResult = calResult.plus(calStack.pop()!);
         }
 
         // calResult *= power;
@@ -677,7 +681,7 @@ export class BaseNumberParser implements IParser {
 export class BasePercentageParser extends BaseNumberParser {
     parse(extResult: ExtractResult): ParseResult | null {
 
-        let originText = extResult.text;
+        const originText = extResult.text;
 
         // do replace text & data from extended info
         if (extResult.data && extResult.data instanceof Array) {
@@ -685,11 +689,11 @@ export class BasePercentageParser extends BaseNumberParser {
             extResult.data = extResult.data[1].data;
         }
 
-        let ret = super.parse(extResult) as ParseResult;
+        const ret = super.parse(extResult) as ParseResult;
 
         if (ret.resolutionStr && ret.resolutionStr.length > 0) {
-            if (!ret.resolutionStr.trim().endsWith("%")) {
-                ret.resolutionStr = ret.resolutionStr.trim() + "%";
+            if (!ret.resolutionStr.trim().endsWith('%')) {
+                ret.resolutionStr = ret.resolutionStr.trim() + '%';
             }
         }
 

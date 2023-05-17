@@ -34,19 +34,19 @@ export class PhoneNumberParser extends BaseSequenceParser {
     ScorePhoneNumber(phoneNumberText: string): number {
         let score = this.baseScore;
 
-        let countryCodeRegex = new RegExp(BasePhoneNumbers.CountryCodeRegex);
-        let areaCodeRegex = new RegExp(BasePhoneNumbers.AreaCodeIndicatorRegex);
-        let formatIndicatorRegex = new RegExp(BasePhoneNumbers.FormatIndicatorRegex, "ig");
-        let noAreaCodeUSphonenumbeRegex = new RegExp(BasePhoneNumbers.NoAreaCodeUSPhoneNumberRegex);
+        const countryCodeRegex = new RegExp(BasePhoneNumbers.CountryCodeRegex);
+        const areaCodeRegex = new RegExp(BasePhoneNumbers.AreaCodeIndicatorRegex);
+        const formatIndicatorRegex = new RegExp(BasePhoneNumbers.FormatIndicatorRegex, "ig");
+        const noAreaCodeUSphonenumbeRegex = new RegExp(BasePhoneNumbers.NoAreaCodeUSPhoneNumberRegex);
 
-        // Country code score or area code score 
+        // Country code score or area code score
         score += countryCodeRegex.test(phoneNumberText) ?
             this.countryCodeAward : areaCodeRegex.test(phoneNumberText) ? this.areaCodeAward : 0;
 
         // Formatted score
         if (formatIndicatorRegex.test(phoneNumberText)) {
-            let formatMathes = phoneNumberText.match(formatIndicatorRegex);
-            let formatIndicatorCount = formatMathes.length;
+            const formatMathes = phoneNumberText.match(formatIndicatorRegex)!;
+            const formatIndicatorCount = formatMathes.length;
             score += Math.min(formatIndicatorCount, this.maxFormatIndicatorNum) * this.formattedAward;
             score -= formatMathes.some(match => match.length > 1) ? this.continueFormatIndicatorDeductionScore : 0;
             if (this.singleBracketRegex.test(phoneNumberText) && !this.completeBracketRegex.test(phoneNumberText)) {
@@ -56,13 +56,13 @@ export class PhoneNumberParser extends BaseSequenceParser {
 
         // Same tailing digit deduction
         if (this.tailSameDigitRegex.test(phoneNumberText)) {
-            score -= (phoneNumberText.match(this.tailSameDigitRegex)[0].length - this.tailSameLimit) * this.tailSameDeductionScore;
+            score -= (phoneNumberText.match(this.tailSameDigitRegex)![0].length - this.tailSameLimit) * this.tailSameDeductionScore;
 
         }
 
         // Length score
         if (this.digitRegex.test(phoneNumberText)) {
-            score += Math.min((phoneNumberText.match(this.digitRegex).length - this.phoneNumberLengthBase),
+            score += Math.min((phoneNumberText.match(this.digitRegex)!.length - this.phoneNumberLengthBase),
                 this.maxLengthAwardNum) * this.lengthAward;
         }
 
@@ -77,7 +77,7 @@ export class PhoneNumberParser extends BaseSequenceParser {
 
         // Continue digit deduction
         if (this.continueDigitRegex.test(phoneNumberText)) {
-            score -= Math.max(phoneNumberText.match(this.continueDigitRegex).length - 1, 0) * this.continueDigitDeductionScore;
+            score -= Math.max(phoneNumberText.match(this.continueDigitRegex)!.length - 1, 0) * this.continueDigitDeductionScore;
         }
 
         // Special award for special USphonenumber, i.e. 223-4567 or 223 - 4567
@@ -89,7 +89,7 @@ export class PhoneNumberParser extends BaseSequenceParser {
     }
 
     parse(extResult: ExtractResult): ParseResult {
-        let result = new ParseResult(extResult);
+        const result = new ParseResult(extResult);
         result.resolutionStr = extResult.text;
         result.value = this.ScorePhoneNumber(extResult.text);
         return result;
@@ -129,12 +129,12 @@ export class GUIDParser extends BaseSequenceParser {
     ScoreGUID(GUIDText: string): number {
         let score = this.baseScore;
 
-        let guidElementRegex = new RegExp(BaseGUID.GUIDRegexElement);
+        const guidElementRegex = new RegExp(BaseGUID.GUIDRegexElement);
 
         if (guidElementRegex.test(GUIDText)) {
-            let elementMatch = GUIDText.match(guidElementRegex);
-            let startIndex = elementMatch.index;
-            let elementGUID = elementMatch[0];
+            const elementMatch = GUIDText.match(guidElementRegex)!;
+            const startIndex = elementMatch.index;
+            const elementGUID = elementMatch[0];
             score -= startIndex == 0 ? this.noBoundaryPenalty : 0;
             score -= this.formatRegex.test(elementGUID) ? 0 : this.noFormatPenalty;
             score -= this.pureDigitRegex.test(GUIDText) ? this.pureDigitPenalty : 0;
@@ -144,7 +144,7 @@ export class GUIDParser extends BaseSequenceParser {
     }
 
     parse(extResult: ExtractResult): ParseResult {
-        let result = new ParseResult(extResult);
+        const result = new ParseResult(extResult);
         result.resolutionStr = extResult.text;
         result.value = this.ScoreGUID(extResult.text);
         return result;

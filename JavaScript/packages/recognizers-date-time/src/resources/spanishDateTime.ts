@@ -114,7 +114,7 @@ export namespace SpanishDateTime {
     export const DateExtractor6 = `(?<=\\b(en|el)\\s+)${MonthNumRegex}[\\-\\.]${DayRegex}${BaseDateTime.CheckDecimalRegex}\\b(?!\\s*[/\\\\\\.]\\s*\\d+)`;
     export const DateExtractor7 = `\\b(?<!\\d[.,])${MonthNumRegex}\\s*/\\s*${DayRegex}((\\s+|\\s*,\\s*|\\s+d[eo]\\s+)${DateYearRegex})?\\b${BaseDateTime.CheckDecimalRegex}(?!\\s*[/\\\\\\.]\\s*\\d+)`;
     export const DateExtractor8 = `(?<=\\b(en|el)\\s+)${DayRegex}[\\\\\\-]${MonthNumRegex}${BaseDateTime.CheckDecimalRegex}\\b(?!\\s*[/\\\\\\.]\\s*\\d+)`;
-    export const DateExtractor9 = `\\b(${WeekDayRegex}\\s+)?(?<!\\d[.,])${DayRegex}\\s*/\\s*${MonthNumRegex}((\\s+|\\s*,\\s*|\\s+d[eo]\\s+)${DateYearRegex})?\\b${BaseDateTime.CheckDecimalRegex}(?!\\s*[/\\\\\\.]\\s*\\d+)`;
+    export const DateExtractor9 = `\\b(${WeekDayRegex}\\s+)?(?<!\\d[.,])${DayRegex}\\s*(/|\\bdel\\b)\\s*${MonthNumRegex}((\\s+|\\s*,\\s*|\\s+d[eo]\\s+)${DateYearRegex})?\\b${BaseDateTime.CheckDecimalRegex}(?!\\s*[/\\\\\\.]\\s*\\d+)`;
     export const DateExtractor10 = `\\b(?<!\\d[.,])((${YearRegex}\\s*[/\\\\\\-\\.]\\s*(${MonthNumRegex}|${MonthRegex})\\s*[/\\\\\\-\\.]\\s*${DayRegex}(?!\\s*[/\\\\\\-\\.]\\s*\\d+))|(${MonthRegex}\\s*[/\\\\\\-\\.]\\s*${BaseDateTime.FourDigitYearRegex}\\s*[/\\\\\\-\\.]\\s*${DayRegex})|(${DayRegex}\\s*[/\\\\\\-\\.]\\s*${BaseDateTime.FourDigitYearRegex}\\s*[/\\\\\\-\\.]\\s*${MonthRegex}))`;
     export const HourRegex = `\\b(?<!\\d[,.])(?<hour>2[0-4]|[0-1]?\\d)`;
     export const HourNumRegex = `\\b(?<hournum>cero|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce)\\b`;
@@ -311,4 +311,5 @@ export namespace SpanishDateTime {
     export const QuarterTypeRegex = `(trimestral(es|mente)?)$`;
     export const SemiAnnualTypeRegex = `(semestral(es|mente)?)$`;
     export const YearTypeRegex = `(años?|anual(mente)?)$`;
+    export const ThisTerms = [ "esta" ];
 }

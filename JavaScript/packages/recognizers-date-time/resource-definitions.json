@@ -53,6 +53,15 @@
                 "export namespace FrenchDateTime {"
             ],
             "footer": [ "}" ]
+        },
+        {
+            "input": [ "Italian", "Italian-DateTime" ],
+            "output": "italianDateTime",
+            "header": [
+                "import { BaseDateTime } from \"./baseDateTime\";",
+                "export namespace ItalianDateTime {"
+            ],
+            "footer": [ "}" ]
         }
     ]
 }

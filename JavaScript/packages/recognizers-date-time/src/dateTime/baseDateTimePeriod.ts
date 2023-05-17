@@ -1,40 +1,44 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// @ts-nocheck
 
-import { IExtractor, ExtractResult, RegExpUtility, StringUtility } from "@microsoft/recognizers-text";
-import { Constants, TimeTypeConstants } from "./constants";
-import { BaseNumberExtractor } from "@microsoft/recognizers-text-number";
-import { BaseDateExtractor, BaseDateParser } from "./baseDate";
-import { BaseTimeExtractor, BaseTimeParser } from "./baseTime";
-import { BaseDateTimeExtractor, BaseDateTimeParser, IDateTimeExtractor } from "./baseDateTime";
-import { BaseDurationExtractor, BaseDurationParser } from "./baseDuration";
-import { IDateTimeParser, DateTimeParseResult } from "./parsers";
-import { DateTimeFormatUtil, DateUtils, Token, DateTimeResolutionResult, StringMap } from "./utilities";
+import { IExtractor, ExtractResult, RegExpUtility, StringUtility } from '@microsoft/recognizers-text';
+import { Constants, TimeTypeConstants } from './constants';
+import { BaseNumberExtractor } from '@microsoft/recognizers-text-number';
+import { BaseDateExtractor, BaseDateParser } from './baseDate';
+import { BaseTimeExtractor, BaseTimeParser } from './baseTime';
+import { BaseDateTimeExtractor, BaseDateTimeParser, IDateTimeExtractor } from './baseDateTime';
+import { BaseDurationExtractor, BaseDurationParser } from './baseDuration';
+import { IDateTimeParser, DateTimeParseResult } from './parsers';
+import { DateTimeFormatUtil, DateUtils, Token, DateTimeResolutionResult, StringMap } from './utilities';
 
 export interface IDateTimePeriodExtractorConfiguration {
-    cardinalExtractor: BaseNumberExtractor
-    singleDateExtractor: IDateTimeExtractor
-    singleTimeExtractor: IDateTimeExtractor
-    singleDateTimeExtractor: IDateTimeExtractor
-    durationExtractor: IDateTimeExtractor
-    timePeriodExtractor: IDateTimeExtractor
-    simpleCasesRegexes: RegExp[]
-    prepositionRegex: RegExp
-    tillRegex: RegExp
-    specificTimeOfDayRegex: RegExp
-    timeOfDayRegex: RegExp
-    periodTimeOfDayWithDateRegex: RegExp
-    followedUnit: RegExp
-    numberCombinedWithUnit: RegExp
-    timeUnitRegex: RegExp
-    previousPrefixRegex: RegExp
-    nextPrefixRegex: RegExp
-    relativeTimeUnitRegex: RegExp
-    restOfDateTimeRegex: RegExp
-    generalEndingRegex: RegExp
-    middlePauseRegex: RegExp
+    cardinalExtractor: BaseNumberExtractor;
+    singleDateExtractor: IDateTimeExtractor;
+    singleTimeExtractor: IDateTimeExtractor;
+    singleDateTimeExtractor: IDateTimeExtractor;
+    durationExtractor: IDateTimeExtractor;
+    timePeriodExtractor: IDateTimeExtractor;
+    simpleCasesRegexes: RegExp[];
+    prepositionRegex: RegExp;
+    tillRegex: RegExp;
+    specificTimeOfDayRegex: RegExp;
+    timeOfDayRegex: RegExp;
+    periodTimeOfDayWithDateRegex: RegExp;
+    followedUnit: RegExp;
+    numberCombinedWithUnit: RegExp;
+    timeUnitRegex: RegExp;
+    previousPrefixRegex: RegExp;
+    nextPrefixRegex: RegExp;
+    relativeTimeUnitRegex: RegExp;
+    restOfDateTimeRegex: RegExp;
+    generalEndingRegex: RegExp;
+    middlePauseRegex: RegExp;
+
     getFromTokenIndex(source: string): { matched: boolean, index: number };
+
     getBetweenTokenIndex(source: string): { matched: boolean, index: number };
+
     hasConnectorToken(source: string): boolean;
 }
 
@@ -50,46 +54,46 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
         if (!refDate) {
             refDate = new Date();
         }
-        let referenceDate = refDate;
+        const referenceDate = refDate;
 
-        let tokens: Token[] = new Array<Token>()
+        const tokens: Token[] = new Array<Token>()
             .concat(this.matchSimpleCases(source, referenceDate))
             .concat(this.mergeTwoTimePoints(source, referenceDate))
             .concat(this.matchDuration(source, referenceDate))
             .concat(this.matchNight(source, referenceDate))
             .concat(this.matchRelativeUnit(source));
-        let result = Token.mergeAllTokens(tokens, source, this.extractorName);
+        const result = Token.mergeAllTokens(tokens, source, this.extractorName);
         return result;
     }
 
     private matchSimpleCases(source: string, refDate: Date): Token[] {
-        let tokens: Token[] = new Array<Token>();
+        const tokens: Token[] = new Array<Token>();
         this.config.simpleCasesRegexes.forEach(regexp => {
             RegExpUtility.getMatches(regexp, source).forEach(match => {
                 // has a date before?
                 let hasBeforeDate = false;
-                let beforeStr = source.substr(0, match.index);
+                const beforeStr = source.substr(0, match.index);
                 if (!StringUtility.isNullOrWhitespace(beforeStr)) {
-                    let ers = this.config.singleDateExtractor.extract(beforeStr, refDate);
+                    const ers = this.config.singleDateExtractor.extract(beforeStr, refDate);
                     if (ers && ers.length > 0) {
-                        let er = ers[ers.length - 1];
-                        let begin = er.start;
-                        let end = er.start + er.length;
-                        let middleStr = beforeStr.substr(begin + er.length).trim().toLowerCase();
+                        const er = ers[ers.length - 1];
+                        const begin = er.start;
+                        const end = er.start + er.length;
+                        const middleStr = beforeStr.substr(begin + er.length).trim().toLowerCase();
                         if (StringUtility.isNullOrWhitespace(middleStr) || RegExpUtility.getMatches(this.config.prepositionRegex, middleStr).length > 0) {
                             tokens.push(new Token(begin, match.index + match.length));
                             hasBeforeDate = true;
                         }
                     }
                 }
-                let followedStr = source.substr(match.index + match.length);
+                const followedStr = source.substr(match.index + match.length);
                 if (!StringUtility.isNullOrWhitespace(followedStr) && !hasBeforeDate) {
-                    let ers = this.config.singleDateExtractor.extract(followedStr, refDate);
+                    const ers = this.config.singleDateExtractor.extract(followedStr, refDate);
                     if (ers && ers.length > 0) {
-                        let er = ers[0];
-                        let begin = er.start;
-                        let end = er.start + er.length;
-                        let middleStr = followedStr.substr(0, begin).trim().toLowerCase();
+                        const er = ers[0];
+                        const begin = er.start;
+                        const end = er.start + er.length;
+                        const middleStr = followedStr.substr(0, begin).trim().toLowerCase();
                         if (StringUtility.isNullOrWhitespace(middleStr) || RegExpUtility.getMatches(this.config.prepositionRegex, middleStr).length > 0) {
                             tokens.push(new Token(match.index, match.index + match.length + end));
                         }
@@ -101,9 +105,9 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
     }
 
     protected mergeTwoTimePoints(source: string, refDate: Date): Token[] {
-        let tokens: Token[] = new Array<Token>();
-        let ersDateTime = this.config.singleDateTimeExtractor.extract(source, refDate);
-        let ersTime = this.config.singleTimeExtractor.extract(source, refDate);
+        const tokens: Token[] = new Array<Token>();
+        const ersDateTime = this.config.singleDateTimeExtractor.extract(source, refDate);
+        const ersTime = this.config.singleTimeExtractor.extract(source, refDate);
         let innerMarks: ExtractResult[] = [];
         let j = 0;
         ersDateTime.forEach((erDateTime, index) => {
@@ -121,23 +125,23 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
         innerMarks = innerMarks.sort((erA, erB) => erA.start < erB.start ? -1 : erA.start === erB.start ? 0 : 1);
         let idx = 0;
         while (idx < innerMarks.length - 1) {
-            let currentMark = innerMarks[idx];
-            let nextMark = innerMarks[idx + 1];
+            const currentMark = innerMarks[idx];
+            const nextMark = innerMarks[idx + 1];
             if (currentMark.type === Constants.SYS_DATETIME_TIME && nextMark.type === Constants.SYS_DATETIME_TIME) {
                 idx++;
                 continue;
             }
-            let middleBegin = currentMark.start + currentMark.length;
-            let middleEnd = nextMark.start;
+            const middleBegin = currentMark.start + currentMark.length;
+            const middleEnd = nextMark.start;
 
-            let middleStr = source.substr(middleBegin, middleEnd - middleBegin).trim().toLowerCase();
-            let matches = RegExpUtility.getMatches(this.config.tillRegex, middleStr);
+            const middleStr = source.substr(middleBegin, middleEnd - middleBegin).trim().toLowerCase();
+            const matches = RegExpUtility.getMatches(this.config.tillRegex, middleStr);
             if (matches && matches.length > 0 && matches[0].index === 0 && matches[0].length === middleStr.length) {
                 let periodBegin = currentMark.start;
-                let periodEnd = nextMark.start + nextMark.length;
-                let beforeStr = source.substr(0, periodBegin).trim().toLowerCase();
-                let matchFrom = this.config.getFromTokenIndex(beforeStr);
-                let fromTokenIndex = matchFrom.matched ? matchFrom : this.config.getBetweenTokenIndex(beforeStr);
+                const periodEnd = nextMark.start + nextMark.length;
+                const beforeStr = source.substr(0, periodBegin).trim().toLowerCase();
+                const matchFrom = this.config.getFromTokenIndex(beforeStr);
+                const fromTokenIndex = matchFrom.matched ? matchFrom : this.config.getBetweenTokenIndex(beforeStr);
                 if (fromTokenIndex.matched) {
                     periodBegin = fromTokenIndex.index;
                 }
@@ -147,9 +151,9 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
             }
             if (this.config.hasConnectorToken(middleStr)) {
                 let periodBegin = currentMark.start;
-                let periodEnd = nextMark.start + nextMark.length;
-                let beforeStr = source.substr(0, periodBegin).trim().toLowerCase();
-                let betweenTokenIndex = this.config.getBetweenTokenIndex(beforeStr);
+                const periodEnd = nextMark.start + nextMark.length;
+                const beforeStr = source.substr(0, periodBegin).trim().toLowerCase();
+                const betweenTokenIndex = this.config.getBetweenTokenIndex(beforeStr);
                 if (betweenTokenIndex.matched) {
                     periodBegin = betweenTokenIndex.index;
                     tokens.push(new Token(periodBegin, periodEnd));
@@ -158,21 +162,22 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
                 }
             }
             idx++;
-        };
+        }
+        ;
         return tokens;
     }
 
     private matchDuration(source: string, refDate: Date): Token[] {
-        let tokens: Token[] = new Array<Token>();
-        let durations: Token[] = new Array<Token>();
+        const tokens: Token[] = new Array<Token>();
+        const durations: Token[] = new Array<Token>();
         this.config.durationExtractor.extract(source, refDate).forEach(duration => {
-            let match = RegExpUtility.getMatches(this.config.timeUnitRegex, duration.text).pop();
+            const match = RegExpUtility.getMatches(this.config.timeUnitRegex, duration.text).pop();
             if (match) {
                 durations.push(new Token(duration.start, duration.start + duration.length));
             }
         });
         durations.forEach(duration => {
-            let beforeStr = source.substr(0, duration.start).toLowerCase();
+            const beforeStr = source.substr(0, duration.start).toLowerCase();
             if (StringUtility.isNullOrWhitespace(beforeStr)) {
                 return;
             }
@@ -190,25 +195,25 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
     }
 
     protected matchNight(source: string, refDate: Date): Token[] {
-        let tokens: Token[] = new Array<Token>();
+        const tokens: Token[] = new Array<Token>();
         RegExpUtility.getMatches(this.config.specificTimeOfDayRegex, source).forEach(match => {
             tokens.push(new Token(match.index, match.index + match.length));
         });
         this.config.singleDateExtractor.extract(source, refDate).forEach(er => {
-            let afterStr = source.substr(er.start + er.length);
+            const afterStr = source.substr(er.start + er.length);
             let match = RegExpUtility.getMatches(this.config.periodTimeOfDayWithDateRegex, afterStr).pop();
             if (match) {
                 if (StringUtility.isNullOrWhitespace(afterStr.substr(0, match.index))) {
                     tokens.push(new Token(er.start, er.start + er.length + match.index + match.length));
                 }
                 else {
-                    let pauseMatch = RegExpUtility.getMatches(this.config.middlePauseRegex, afterStr.substr(0, match.index)).pop();
+                    const pauseMatch = RegExpUtility.getMatches(this.config.middlePauseRegex, afterStr.substr(0, match.index)).pop();
 
                     if (pauseMatch) {
                         // TODO: should use trimStart() instead?
-                        let suffix = afterStr.substr(match.index + match.length).trim();
+                        const suffix = afterStr.substr(match.index + match.length).trim();
 
-                        let endingMatch = RegExpUtility.getMatches(this.config.generalEndingRegex, suffix).pop();
+                        const endingMatch = RegExpUtility.getMatches(this.config.generalEndingRegex, suffix).pop();
                         if (endingMatch) {
                             tokens.push(new Token(er.start || 0, er.start + er.length + match.index + match.length || 0));
                         }
@@ -216,23 +221,23 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
                 }
             }
 
-            let beforeStr = source.substr(0, er.start);
+            const beforeStr = source.substr(0, er.start);
             match = RegExpUtility.getMatches(this.config.periodTimeOfDayWithDateRegex, beforeStr).pop();
             if (match) {
                 if (StringUtility.isNullOrWhitespace(beforeStr.substr(match.index + match.length))) {
-                    let middleStr = source.substr(match.index + match.length, er.start - match.index - match.length);
+                    const middleStr = source.substr(match.index + match.length, er.start - match.index - match.length);
                     if (StringUtility.isWhitespace(middleStr)) {
                         tokens.push(new Token(match.index, er.start + er.length));
                     }
                 }
                 else {
-                    let pauseMatch = RegExpUtility.getMatches(this.config.middlePauseRegex, beforeStr.substr(match.index + match.length)).pop();
+                    const pauseMatch = RegExpUtility.getMatches(this.config.middlePauseRegex, beforeStr.substr(match.index + match.length)).pop();
 
                     if (pauseMatch) {
                         // TODO: should use trimStart() instead?
-                        let suffix = source.substr(er.start + er.length || 0).trim();
+                        const suffix = source.substr(er.start + er.length || 0).trim();
 
-                        let endingMatch = RegExpUtility.getMatches(this.config.generalEndingRegex, suffix).pop();
+                        const endingMatch = RegExpUtility.getMatches(this.config.generalEndingRegex, suffix).pop();
                         if (endingMatch) {
                             tokens.push(new Token(match.index, er.start + er.length || 0));
                         }
@@ -242,15 +247,15 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
             }
 
             // check whether there are adjacent time period strings, before or after
-            for (let e of tokens) {
-                // try to extract a time period in before-string 
+            for (const e of tokens) {
+                // try to extract a time period in before-string
                 if (e.start > 0) {
-                    let beforeStr = source.substr(0, e.start);
+                    const beforeStr = source.substr(0, e.start);
                     if (!StringUtility.isNullOrWhitespace(beforeStr)) {
-                        let timeErs = this.config.timePeriodExtractor.extract(beforeStr);
+                        const timeErs = this.config.timePeriodExtractor.extract(beforeStr);
                         if (timeErs.length > 0) {
-                            for (let tp of timeErs) {
-                                let midStr = beforeStr.substr(tp.start + tp.length || 0);
+                            for (const tp of timeErs) {
+                                const midStr = beforeStr.substr(tp.start + tp.length || 0);
                                 if (StringUtility.isNullOrWhitespace(midStr)) {
                                     tokens.push(new Token(tp.start || 0, tp.start + tp.length + midStr.length + e.length || 0));
                                 }
@@ -261,12 +266,12 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
 
                 // try to extract a time period in after-string
                 if (e.start + e.length <= source.length) {
-                    let afterStr = source.substr(e.start + e.length);
+                    const afterStr = source.substr(e.start + e.length);
                     if (!StringUtility.isNullOrWhitespace(afterStr)) {
-                        let timeErs = this.config.timePeriodExtractor.extract(afterStr);
+                        const timeErs = this.config.timePeriodExtractor.extract(afterStr);
                         if (timeErs.length > 0) {
-                            for (let tp of timeErs) {
-                                let midStr = afterStr.substr(0, tp.start || 0);
+                            for (const tp of timeErs) {
+                                const midStr = afterStr.substr(0, tp.start || 0);
                                 if (StringUtility.isNullOrWhitespace(midStr)) {
                                     tokens.push(new Token(e.start, e.start + e.length + midStr.length + tp.length || 0));
                                 }
@@ -281,7 +286,7 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
     }
 
     private matchRelativeUnit(source: string): Token[] {
-        let tokens: Token[] = new Array<Token>();
+        const tokens: Token[] = new Array<Token>();
         let matches = RegExpUtility.getMatches(this.config.relativeTimeUnitRegex, source);
         if (matches.length === 0) {
             matches = RegExpUtility.getMatches(this.config.restOfDateTimeRegex, source);
@@ -294,28 +299,36 @@ export class BaseDateTimePeriodExtractor implements IDateTimeExtractor {
 }
 
 export interface IDateTimePeriodParserConfiguration {
-    pureNumberFromToRegex: RegExp
-    pureNumberBetweenAndRegex: RegExp
-    periodTimeOfDayWithDateRegex: RegExp
-    specificTimeOfDayRegex: RegExp
-    pastRegex: RegExp
-    futureRegex: RegExp
-    relativeTimeUnitRegex: RegExp
-    restOfDateTimeRegex: RegExp
-    numbers: ReadonlyMap<string, number>
-    unitMap: ReadonlyMap<string, string>
-    dateExtractor: IDateTimeExtractor
-    timeExtractor: IDateTimeExtractor
-    dateTimeExtractor: IDateTimeExtractor
-    timePeriodExtractor: IDateTimeExtractor
-    durationExtractor: IDateTimeExtractor
-    dateParser: BaseDateParser
-    timeParser: BaseTimeParser
-    dateTimeParser: BaseDateTimeParser
-    timePeriodParser: IDateTimeParser
-    durationParser: BaseDurationParser
-    getMatchedTimeRange(source: string): { timeStr: string, beginHour: number, endHour: number, endMin: number, success: boolean }
-    getSwiftPrefix(source: string): number
+    pureNumberFromToRegex: RegExp;
+    pureNumberBetweenAndRegex: RegExp;
+    periodTimeOfDayWithDateRegex: RegExp;
+    specificTimeOfDayRegex: RegExp;
+    pastRegex: RegExp;
+    futureRegex: RegExp;
+    relativeTimeUnitRegex: RegExp;
+    restOfDateTimeRegex: RegExp;
+    numbers: ReadonlyMap<string, number>;
+    unitMap: ReadonlyMap<string, string>;
+    dateExtractor: IDateTimeExtractor;
+    timeExtractor: IDateTimeExtractor;
+    dateTimeExtractor: IDateTimeExtractor;
+    timePeriodExtractor: IDateTimeExtractor;
+    durationExtractor: IDateTimeExtractor;
+    dateParser: BaseDateParser;
+    timeParser: BaseTimeParser;
+    dateTimeParser: BaseDateTimeParser;
+    timePeriodParser: IDateTimeParser;
+    durationParser: BaseDurationParser;
+
+    getMatchedTimeRange(source: string): {
+        timeStr: string,
+        beginHour: number,
+        endHour: number,
+        endMin: number,
+        success: boolean
+    };
+
+    getSwiftPrefix(source: string): number;
 }
 
 export class BaseDateTimePeriodParser implements IDateTimeParser {
@@ -332,7 +345,7 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
         }
         let resultValue;
         if (extractorResult.type === this.parserName) {
-            let source = extractorResult.text.trim().toLowerCase();
+            const source = extractorResult.text.trim().toLowerCase();
             let innerResult = this.mergeDateAndTimePeriods(source, referenceDate);
             if (!innerResult.success) {
                 innerResult = this.mergeTwoTimePoints(source, referenceDate);
@@ -356,7 +369,7 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
                 resultValue = innerResult;
             }
         }
-        let result = new DateTimeParseResult(extractorResult);
+        const result = new DateTimeParseResult(extractorResult);
         result.value = resultValue;
         result.timexStr = resultValue ? resultValue.timex : '';
         result.resolutionStr = '';
@@ -365,16 +378,16 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
     }
 
     protected mergeDateAndTimePeriods(text: string, referenceTime: Date): DateTimeResolutionResult {
-        let ret = new DateTimeResolutionResult();
-        let trimedText = text.trim().toLowerCase();
+        const ret = new DateTimeResolutionResult();
+        const trimedText = text.trim().toLowerCase();
 
-        let er = this.config.timePeriodExtractor.extract(trimedText, referenceTime);
+        const er = this.config.timePeriodExtractor.extract(trimedText, referenceTime);
         if (er.length !== 1) {
             return this.parseSimpleCases(text, referenceTime);
         }
 
-        let timePeriodParseResult = this.config.timePeriodParser.parse(er[0]);
-        let timePeriodResolutionResult = timePeriodParseResult.value;
+        const timePeriodParseResult = this.config.timePeriodParser.parse(er[0])!;
+        const timePeriodResolutionResult = timePeriodParseResult.value;
 
         if (!timePeriodResolutionResult) {
             return this.parseSimpleCases(text, referenceTime);
@@ -383,13 +396,13 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
         let timePeriodTimex = timePeriodResolutionResult.timex;
         // if it is a range type timex
         if (!StringUtility.isNullOrEmpty(timePeriodTimex)
-            && timePeriodTimex.startsWith("(")) {
-            let dateResult = this.config.dateExtractor.extract(trimedText.replace(er[0].text, ""), referenceTime);
-            let dateStr = "";
+            && timePeriodTimex.startsWith('(')) {
+            const dateResult = this.config.dateExtractor.extract(trimedText.replace(er[0].text, ''), referenceTime);
+            let dateStr = '';
             let futureTime: Date;
             let pastTime: Date;
-            if (dateResult.length === 1 && trimedText.replace(er[0].text, "").trim() === dateResult[0].text) {
-                let pr = this.config.dateParser.parse(dateResult[0], referenceTime);
+            if (dateResult.length === 1 && trimedText.replace(er[0].text, '').trim() === dateResult[0].text) {
+                const pr = this.config.dateParser.parse(dateResult[0], referenceTime)!;
                 if (pr.value) {
                     futureTime = pr.value.futureValue;
                     pastTime = pr.value.pastValue;
@@ -400,15 +413,15 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
                     return this.parseSimpleCases(text, referenceTime);
                 }
 
-                timePeriodTimex = timePeriodTimex.replace("(", "").replace(")", "");
-                let timePeriodTimexArray = timePeriodTimex.split(',');
-                let timePeriodFutureValue = timePeriodResolutionResult.futureValue;
-                let beginTime = timePeriodFutureValue.item1;
-                let endTime = timePeriodFutureValue.item2;
+                timePeriodTimex = timePeriodTimex.replace('(', '').replace(')', '');
+                const timePeriodTimexArray = timePeriodTimex.split(',');
+                const timePeriodFutureValue = timePeriodResolutionResult.futureValue;
+                const beginTime = timePeriodFutureValue.item1;
+                const endTime = timePeriodFutureValue.item2;
 
                 if (timePeriodTimexArray.length === 3) {
-                    let beginStr = dateStr + timePeriodTimexArray[0];
-                    let endStr = dateStr + timePeriodTimexArray[1];
+                    const beginStr = dateStr + timePeriodTimexArray[0];
+                    const endStr = dateStr + timePeriodTimexArray[1];
 
                     ret.timex = `(${beginStr},${endStr},${timePeriodTimexArray[2]})`;
 
@@ -425,8 +438,8 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
                             endTime.getHours(), endTime.getMinutes(), endTime.getSeconds())];
 
                     if (!StringUtility.isNullOrEmpty(timePeriodResolutionResult.comment)
-                        && timePeriodResolutionResult.comment === "ampm") {
-                        ret.comment = "ampm";
+                        && timePeriodResolutionResult.comment === 'ampm') {
+                        ret.comment = 'ampm';
                     }
 
                     ret.success = true;
@@ -444,7 +457,7 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
     }
 
     private parseSimpleCases(source: string, referenceDate: Date): DateTimeResolutionResult {
-        let result = new DateTimeResolutionResult();
+        const result = new DateTimeResolutionResult();
         let match = RegExpUtility.getMatches(this.config.pureNumberFromToRegex, source).pop();
         if (!match) {
             match = RegExpUtility.getMatches(this.config.pureNumberBetweenAndRegex, source).pop();
@@ -453,30 +466,30 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
             return result;
         }
 
-        let hourGroup = match.groups('hour');
+        const hourGroup = match.groups('hour');
         let beginHour = this.config.numbers.get(hourGroup.captures[0]) || Number.parseInt(hourGroup.captures[0], 10) || 0;
         let endHour = this.config.numbers.get(hourGroup.captures[1]) || Number.parseInt(hourGroup.captures[1], 10) || 0;
 
-        let er = this.config.dateExtractor.extract(source.replace(match.value, ""), referenceDate).pop();
+        const er = this.config.dateExtractor.extract(source.replace(match.value, ''), referenceDate).pop();
         if (!er) {
             return result;
         }
 
-        let pr = this.config.dateParser.parse(er, referenceDate);
+        const pr = this.config.dateParser.parse(er, referenceDate);
         if (!pr) {
             return result;
         }
 
-        let dateResult: DateTimeResolutionResult = pr.value;
-        let futureDate: Date = dateResult.futureValue;
-        let pastDate: Date = dateResult.pastValue;
-        let dateStr = pr.timexStr;
+        const dateResult: DateTimeResolutionResult = pr.value;
+        const futureDate: Date = dateResult.futureValue;
+        const pastDate: Date = dateResult.pastValue;
+        const dateStr = pr.timexStr;
 
         let hasAm = false;
         let hasPm = false;
-        let pmStr = match.groups('pm').value;
-        let amStr = match.groups('am').value;
-        let descStr = match.groups('desc').value;
+        const pmStr = match.groups('pm').value;
+        const amStr = match.groups('am').value;
+        const descStr = match.groups('desc').value;
 
         if (!StringUtility.isNullOrEmpty(amStr) || descStr.startsWith('a')) {
             if (beginHour >= 12) {
@@ -497,30 +510,30 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
             hasPm = true;
         }
         if (!hasAm && !hasPm && beginHour <= 12 && endHour <= 12) {
-            result.comment = "ampm";
+            result.comment = 'ampm';
         }
 
-        let beginStr = `${dateStr}T${DateTimeFormatUtil.toString(beginHour, 2)}`;
-        let endStr = `${dateStr}T${DateTimeFormatUtil.toString(endHour, 2)}`;
+        const beginStr = `${dateStr}T${DateTimeFormatUtil.toString(beginHour, 2)}`;
+        const endStr = `${dateStr}T${DateTimeFormatUtil.toString(endHour, 2)}`;
 
         result.timex = `(${beginStr},${endStr},PT${endHour - beginHour}H)`;
         result.futureValue = [
             DateUtils.safeCreateFromMinValue(futureDate.getFullYear(), futureDate.getMonth(), futureDate.getDate(), beginHour, 0, 0),
-            DateUtils.safeCreateFromMinValue(futureDate.getFullYear(), futureDate.getMonth(), futureDate.getDate(), endHour, 0, 0)
+            DateUtils.safeCreateFromMinValue(futureDate.getFullYear(), futureDate.getMonth(), futureDate.getDate(), endHour, 0, 0),
         ];
         result.pastValue = [
             DateUtils.safeCreateFromMinValue(pastDate.getFullYear(), pastDate.getMonth(), pastDate.getDate(), beginHour, 0, 0),
-            DateUtils.safeCreateFromMinValue(pastDate.getFullYear(), pastDate.getMonth(), pastDate.getDate(), endHour, 0, 0)
+            DateUtils.safeCreateFromMinValue(pastDate.getFullYear(), pastDate.getMonth(), pastDate.getDate(), endHour, 0, 0),
         ];
         result.success = true;
         return result;
     }
 
     protected mergeTwoTimePoints(source: string, referenceDate: Date): DateTimeResolutionResult {
-        let result = new DateTimeResolutionResult();
-        let prs: { begin: DateTimeParseResult, end: DateTimeParseResult };
-        let timeErs = this.config.timeExtractor.extract(source, referenceDate);
-        let datetimeErs = this.config.dateTimeExtractor.extract(source, referenceDate);
+        const result = new DateTimeResolutionResult();
+        let prs: { begin: DateTimeParseResult, end: DateTimeParseResult } | null = null;
+        const timeErs = this.config.timeExtractor.extract(source, referenceDate);
+        const datetimeErs = this.config.dateTimeExtractor.extract(source, referenceDate);
         let bothHasDate = false;
         let beginHasDate = false;
         let endHasDate = false;
@@ -556,8 +569,8 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
             return result;
         }
 
-        let begin: DateTimeResolutionResult = prs.begin.value;
-        let end: DateTimeResolutionResult = prs.end.value;
+        const begin: DateTimeResolutionResult = prs.begin.value;
+        const end: DateTimeResolutionResult = prs.end.value;
 
         let futureBegin: Date = begin.futureValue;
         let futureEnd: Date = end.futureValue;
@@ -576,13 +589,13 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
         else if (beginHasDate) {
             futureEnd = DateUtils.safeCreateFromMinValue(futureBegin.getFullYear(), futureBegin.getMonth(), futureBegin.getDate(), futureEnd.getHours(), futureEnd.getMinutes(), futureEnd.getSeconds());
             pastEnd = DateUtils.safeCreateFromMinValue(pastBegin.getFullYear(), pastBegin.getMonth(), pastBegin.getDate(), pastEnd.getHours(), pastEnd.getMinutes(), pastEnd.getSeconds());
-            let dateStr = prs.begin.timexStr.split('T').pop();
+            const dateStr = prs.begin.timexStr.split('T').pop();
             result.timex = `(${prs.begin.timexStr},${dateStr}${prs.end.timexStr},${DateTimeFormatUtil.luisTimeSpan(futureBegin, futureEnd)})`;
         }
         else if (endHasDate) {
             futureBegin = DateUtils.safeCreateFromMinValue(futureEnd.getFullYear(), futureEnd.getMonth(), futureEnd.getDate(), futureBegin.getHours(), futureBegin.getMinutes(), futureBegin.getSeconds());
             pastBegin = DateUtils.safeCreateFromMinValue(pastEnd.getFullYear(), pastEnd.getMonth(), pastEnd.getDate(), pastBegin.getHours(), pastBegin.getMinutes(), pastBegin.getSeconds());
-            let dateStr = prs.end.timexStr.split('T')[0];
+            const dateStr = prs.end.timexStr.split('T')[0];
             result.timex = `(${dateStr}${prs.begin.timexStr},${prs.end.timexStr},${DateTimeFormatUtil.luisTimeSpan(futureBegin, futureEnd)})`;
         }
         if (!StringUtility.isNullOrEmpty(begin.comment) && begin.comment.endsWith('ampm') && !StringUtility.isNullOrEmpty(end.comment) && end.comment.endsWith('ampm')) {
@@ -598,13 +611,13 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
 
     protected getTwoPoints(beginEr: ExtractResult, endEr: ExtractResult, beginParser: IDateTimeParser, endParser: IDateTimeParser, referenceDate: Date)
         : { begin: DateTimeParseResult, end: DateTimeParseResult } {
-        let beginPr = beginParser.parse(beginEr, referenceDate);
-        let endPr = endParser.parse(endEr, referenceDate);
+        const beginPr = beginParser.parse(beginEr, referenceDate)!;
+        const endPr = endParser.parse(endEr, referenceDate)!;
         return { begin: beginPr, end: endPr };
     }
 
     protected parseSpecificTimeOfDay(source: string, referenceDate: Date): DateTimeResolutionResult {
-        let result = new DateTimeResolutionResult();
+        const result = new DateTimeResolutionResult();
         let timeText = source;
         let hasEarly = false;
         let hasLate = false;
@@ -624,7 +637,7 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
             }
         }
 
-        let matched = this.config.getMatchedTimeRange(timeText);
+        const matched = this.config.getMatchedTimeRange(timeText);
         if (!matched || !matched.success) {
             return result;
         }
@@ -641,8 +654,8 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
 
         match = RegExpUtility.getMatches(this.config.specificTimeOfDayRegex, source).pop();
         if (match && match.index === 0 && match.length === source.length) {
-            let swift = this.config.getSwiftPrefix(source);
-            let date = DateUtils.addDays(referenceDate, swift);
+            const swift = this.config.getSwiftPrefix(source);
+            const date = DateUtils.addDays(referenceDate, swift);
             result.timex = DateTimeFormatUtil.formatDate(date) + matched.timeStr;
             result.futureValue = [
                 DateUtils.safeCreateFromMinValue(date.getFullYear(), date.getMonth(), date.getDate(), matched.beginHour, 0, 0),
@@ -680,7 +693,7 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
         if (ers.length === 0 || ers[0].length !== beforeStr.length) {
             let valid = false;
             if (ers.length > 0 && ers[0].start === 0) {
-                let midStr = beforeStr.substr(ers[0].start + ers[0].length || 0);
+                const midStr = beforeStr.substr(ers[0].start + ers[0].length || 0);
                 if (StringUtility.isNullOrWhitespace(midStr.replace(',', ' '))) {
                     valid = true;
                 }
@@ -690,7 +703,7 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
                 ers = this.config.dateExtractor.extract(afterStr);
                 if (ers.length === 0 || ers[0].length !== afterStr.length) {
                     if (ers.length > 0 && ers[0].start + ers[0].length === afterStr.length) {
-                        let midStr = afterStr.substr(0, ers[0].start || 0);
+                        const midStr = afterStr.substr(0, ers[0].start || 0);
                         if (StringUtility.isNullOrWhitespace(midStr.replace(',', ' '))) {
                             valid = true;
                         }
@@ -708,10 +721,10 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
 
         let hasSpecificTimePeriod = false;
         if (timePeriodErs.length > 0) {
-            let TimePr = this.config.timePeriodParser.parse(timePeriodErs[0], referenceDate);
+            const TimePr = this.config.timePeriodParser.parse(timePeriodErs[0], referenceDate);
             if (TimePr != null) {
-                let periodFuture = TimePr.value.futureValue;
-                let periodPast = TimePr.value.pastValue;
+                const periodFuture = TimePr.value.futureValue;
+                const periodPast = TimePr.value.pastValue;
 
                 if (periodFuture === periodPast) {
                     matched.beginHour = periodFuture.item1.getHours();
@@ -731,13 +744,13 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
             }
         }
 
-        let pr = this.config.dateParser.parse(ers[0], referenceDate);
+        const pr = this.config.dateParser.parse(ers[0], referenceDate);
         if (!pr) {
             return result;
         }
 
-        let futureDate: Date = pr.value.futureValue;
-        let pastDate: Date = pr.value.pastValue;
+        const futureDate: Date = pr.value.futureValue;
+        const pastDate: Date = pr.value.pastValue;
 
 
         if (!hasSpecificTimePeriod) {
@@ -760,32 +773,32 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
     }
 
     protected parseDuration(source: string, referenceDate: Date): DateTimeResolutionResult {
-        let result = new DateTimeResolutionResult();
+        const result = new DateTimeResolutionResult();
 
         // for rest of datetime, it will be handled in next function
-        let restOfDateTimeMatch = RegExpUtility.getMatches(this.config.restOfDateTimeRegex, source);
+        const restOfDateTimeMatch = RegExpUtility.getMatches(this.config.restOfDateTimeRegex, source);
         if (restOfDateTimeMatch.length) {
             return result;
         }
 
-        let ers = this.config.durationExtractor.extract(source, referenceDate);
+        const ers = this.config.durationExtractor.extract(source, referenceDate);
         if (!ers || ers.length !== 1) {
             return result;
         }
 
-        let pr = this.config.durationParser.parse(ers[0], referenceDate);
+        const pr = this.config.durationParser.parse(ers[0], referenceDate);
         if (!pr) {
             return result;
         }
 
-        let beforeStr = source.substr(0, pr.start).trim();
-        let durationResult: DateTimeResolutionResult = pr.value;
+        const beforeStr = source.substr(0, pr.start).trim();
+        const durationResult: DateTimeResolutionResult = pr.value;
         let swiftSecond = 0;
-        let mod: string;
+        let mod: string | null = null;
         if (Number.isFinite(durationResult.pastValue) && Number.isFinite(durationResult.futureValue)) {
             swiftSecond = Math.round(durationResult.futureValue);
         }
-        let beginTime = new Date(referenceDate);
+        const beginTime = new Date(referenceDate);
         let endTime = new Date(referenceDate);
         let prefixMatch = RegExpUtility.getMatches(this.config.pastRegex, beforeStr).pop();
         if (prefixMatch && prefixMatch.length === beforeStr.length) {
@@ -799,10 +812,10 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
             endTime.setSeconds(beginTime.getSeconds() + swiftSecond);
         }
 
-        let luisDateBegin = DateTimeFormatUtil.luisDateFromDate(beginTime);
-        let luisTimeBegin = DateTimeFormatUtil.luisTimeFromDate(beginTime);
-        let luisDateEnd = DateTimeFormatUtil.luisDateFromDate(endTime);
-        let luisTimeEnd = DateTimeFormatUtil.luisTimeFromDate(endTime);
+        const luisDateBegin = DateTimeFormatUtil.luisDateFromDate(beginTime);
+        const luisTimeBegin = DateTimeFormatUtil.luisTimeFromDate(beginTime);
+        const luisDateEnd = DateTimeFormatUtil.luisDateFromDate(endTime);
+        const luisTimeEnd = DateTimeFormatUtil.luisTimeFromDate(endTime);
 
         result.timex = `(${luisDateBegin}T${luisTimeBegin},${luisDateEnd}T${luisTimeEnd},${durationResult.timex})`;
         result.futureValue = [beginTime, endTime];
@@ -822,7 +835,7 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
     }
 
     private parseRelativeUnit(source: string, referenceDate: Date): DateTimeResolutionResult {
-        let result = new DateTimeResolutionResult();
+        const result = new DateTimeResolutionResult();
         let match = RegExpUtility.getMatches(this.config.relativeTimeUnitRegex, source).pop();
         if (!match) {
             match = RegExpUtility.getMatches(this.config.restOfDateTimeRegex, source).pop();
@@ -831,51 +844,52 @@ export class BaseDateTimePeriodParser implements IDateTimeParser {
             return result;
         }
 
-        let srcUnit = match.groups('unit').value;
-        let unitStr = this.config.unitMap.get(srcUnit);
+        const srcUnit = match.groups('unit').value;
+        const unitStr = this.config.unitMap.get(srcUnit);
 
         if (!unitStr) {
             return result;
         }
         let swift = 1;
-        let prefixMatch = RegExpUtility.getMatches(this.config.pastRegex, source).pop();
+        const prefixMatch = RegExpUtility.getMatches(this.config.pastRegex, source).pop();
         if (prefixMatch) {
             swift = -1;
         }
 
-        let beginTime = new Date(referenceDate);
+        const beginTime = new Date(referenceDate);
         let endTime = new Date(referenceDate);
         let ptTimex = '';
 
         switch (unitStr) {
-            case 'D':
-                endTime = DateUtils.safeCreateFromMinValue(beginTime.getFullYear(), beginTime.getMonth(), beginTime.getDate());
-                endTime.setDate(endTime.getDate() + 1);
-                endTime.setSeconds(endTime.getSeconds() - 1);
-                ptTimex = `PT${DateUtils.totalSeconds(endTime, beginTime)}S`;
-                break;
-            case 'H':
-                beginTime.setHours(beginTime.getHours() + (swift > 0 ? 0 : swift));
-                endTime.setHours(endTime.getHours() + (swift > 0 ? swift : 0));
-                ptTimex = `PT1H`;
-                break;
-            case 'M':
-                beginTime.setMinutes(beginTime.getMinutes() + (swift > 0 ? 0 : swift));
-                endTime.setMinutes(endTime.getMinutes() + (swift > 0 ? swift : 0));
-                ptTimex = `PT1M`;
-                break;
-            case 'S':
-                beginTime.setSeconds(beginTime.getSeconds() + (swift > 0 ? 0 : swift));
-                endTime.setSeconds(endTime.getSeconds() + (swift > 0 ? swift : 0));
-                ptTimex = `PT1S`;
-                break;
-            default: return result;
+        case 'D':
+            endTime = DateUtils.safeCreateFromMinValue(beginTime.getFullYear(), beginTime.getMonth(), beginTime.getDate());
+            endTime.setDate(endTime.getDate() + 1);
+            endTime.setSeconds(endTime.getSeconds() - 1);
+            ptTimex = `PT${DateUtils.totalSeconds(endTime, beginTime)}S`;
+            break;
+        case 'H':
+            beginTime.setHours(beginTime.getHours() + (swift > 0 ? 0 : swift));
+            endTime.setHours(endTime.getHours() + (swift > 0 ? swift : 0));
+            ptTimex = `PT1H`;
+            break;
+        case 'M':
+            beginTime.setMinutes(beginTime.getMinutes() + (swift > 0 ? 0 : swift));
+            endTime.setMinutes(endTime.getMinutes() + (swift > 0 ? swift : 0));
+            ptTimex = `PT1M`;
+            break;
+        case 'S':
+            beginTime.setSeconds(beginTime.getSeconds() + (swift > 0 ? 0 : swift));
+            endTime.setSeconds(endTime.getSeconds() + (swift > 0 ? swift : 0));
+            ptTimex = `PT1S`;
+            break;
+        default:
+            return result;
         }
 
-        let luisDateBegin = DateTimeFormatUtil.luisDateFromDate(beginTime);
-        let luisTimeBegin = DateTimeFormatUtil.luisTimeFromDate(beginTime);
-        let luisDateEnd = DateTimeFormatUtil.luisDateFromDate(endTime);
-        let luisTimeEnd = DateTimeFormatUtil.luisTimeFromDate(endTime);
+        const luisDateBegin = DateTimeFormatUtil.luisDateFromDate(beginTime);
+        const luisTimeBegin = DateTimeFormatUtil.luisTimeFromDate(beginTime);
+        const luisDateEnd = DateTimeFormatUtil.luisDateFromDate(endTime);
+        const luisTimeEnd = DateTimeFormatUtil.luisTimeFromDate(endTime);
 
         result.timex = `(${luisDateBegin}T${luisTimeBegin},${luisDateEnd}T${luisTimeEnd},${ptTimex})`;
         result.futureValue = [beginTime, endTime];

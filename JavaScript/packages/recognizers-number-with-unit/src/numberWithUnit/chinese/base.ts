@@ -24,7 +24,7 @@ export abstract class ChineseNumberWithUnitExtractorConfiguration implements INu
     readonly connectorToken: string;
     readonly compoundUnitConnectorRegex: RegExp;
     readonly nonUnitRegex: RegExp;
-    readonly ambiguousUnitNumberMultiplierRegex: RegExp;
+    readonly ambiguousUnitNumberMultiplierRegex!: RegExp;
 
     constructor(ci: CultureInfo) {
         this.cultureInfo = ci;

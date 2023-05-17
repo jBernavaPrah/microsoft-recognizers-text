@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IModel, ModelResult, IExtractor, IParser, ParseResult, QueryProcessor } from "@microsoft/recognizers-text";
-import { Constants } from "./constants";
+import { IModel, ModelResult, IExtractor, IParser, ParseResult, QueryProcessor } from '@microsoft/recognizers-text';
+import { Constants } from './constants';
 
 export enum NumberMode {
     // Default is for unit and datetime
@@ -79,38 +79,35 @@ export abstract class AbstractNumberModel implements IModel {
 
     parse(query: string): ModelResult[] {
         query = QueryProcessor.preProcess(query, true);
-        let parseNums: ParseResult[];
+        let parseNums: (ParseResult | null)[] = [];
 
         try {
-            let extractResults = this.extractor.extract(query);
-            parseNums = extractResults.map(r => this.parser.parse(r));
-        }
-        catch (err) {
+            parseNums = this.extractor.extract(query).map(r => this.parser.parse(r));
+        } catch (err) {
             // Nothing to do. Exceptions in result process should not affect other extracted entities.
             // No result.
         }
-        finally {
-            return parseNums
-                .map(o => o as ParseResult)
-                .map(o => ({
-                    start: o.start,
-                    end: o.start + o.length - 1,
-                    resolution: { value: o.resolutionStr },
-                    text: o.text,
-                    typeName: this.modelTypeName
-                }));
-        }
+
+        return parseNums
+            .map(o => o as ParseResult)
+            .map(o => ({
+                start: o.start,
+                end: o.start + o.length - 1,
+                resolution: { value: o.resolutionStr },
+                text: o.text,
+                typeName: this.modelTypeName,
+            }));
     }
 }
 
 export class NumberModel extends AbstractNumberModel {
-    modelTypeName: string = "number";
+    modelTypeName: string = 'number';
 }
 
 export class OrdinalModel extends AbstractNumberModel {
-    modelTypeName: string = "ordinal";
+    modelTypeName: string = 'ordinal';
 }
 
 export class PercentModel extends AbstractNumberModel {
-    modelTypeName: string = "percentage";
+    modelTypeName: string = 'percentage';
 }

@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { BaseNumberExtractor, RegExpValue, RegExpRegExp, BasePercentageExtractor } from "../extractors";
-import { Constants } from "../constants";
-import { LongFormatType } from "../models";
-import { ChineseNumeric } from "../../resources/chineseNumeric";
-import { RegExpUtility } from "@microsoft/recognizers-text";
+import { BaseNumberExtractor, RegExpRegExp, RegExpValue } from '../extractors';
+import { Constants } from '../constants';
+import { ChineseNumeric } from '../../resources/chineseNumeric';
+import { RegExpUtility } from '@microsoft/recognizers-text';
 
 export enum ChineseNumberExtractorMode {
     // Number extraction with an allow list that filters what numbers to extract.
@@ -19,23 +18,23 @@ export class ChineseNumberExtractor extends BaseNumberExtractor {
 
     constructor(mode: ChineseNumberExtractorMode = ChineseNumberExtractorMode.Default) {
         super();
-        let regexes = new Array<RegExpValue>();
+        const regexes = new Array<RegExpValue>();
 
         // Add Cardinal
-        let cardExtract = new ChineseCardinalExtractor(mode);
+        const cardExtract = new ChineseCardinalExtractor(mode);
         cardExtract.regexes.forEach(r => regexes.push(r));
 
         // Add Fraction
-        let fracExtract = new ChineseFractionExtractor();
+        const fracExtract = new ChineseFractionExtractor();
         fracExtract.regexes.forEach(r => regexes.push(r));
 
         this.regexes = regexes;
 
         // Add filter
-        let ambiguityFiltersDict = new Array<RegExpRegExp>();
+        const ambiguityFiltersDict = new Array<RegExpRegExp>();
 
 
-        for (let [key, value] of ChineseNumeric.AmbiguityFiltersDict) {
+        for (const [key, value] of ChineseNumeric.AmbiguityFiltersDict) {
             ambiguityFiltersDict.push({ regExpKey: RegExpUtility.getSafeRegExp(key, "gs"), regExpValue: RegExpUtility.getSafeRegExp(value, "gs") })
         }
 
@@ -48,14 +47,14 @@ export class ChineseCardinalExtractor extends BaseNumberExtractor {
 
     constructor(mode: ChineseNumberExtractorMode = ChineseNumberExtractorMode.Default) {
         super();
-        let regexes = new Array<RegExpValue>();
+        const regexes = new Array<RegExpValue>();
 
         // Add Integer Regexes
-        let intExtract = new ChineseIntegerExtractor(mode);
+        const intExtract = new ChineseIntegerExtractor(mode);
         intExtract.regexes.forEach(r => regexes.push(r));
 
         // Add Double Regexes
-        let doubleExtract = new ChineseDoubleExtractor();
+        const doubleExtract = new ChineseDoubleExtractor();
         doubleExtract.regexes.forEach(r => regexes.push(r));
 
         this.regexes = regexes;
@@ -68,7 +67,7 @@ export class ChineseIntegerExtractor extends BaseNumberExtractor {
     constructor(mode: ChineseNumberExtractorMode = ChineseNumberExtractorMode.Default) {
         super();
 
-        let regexes = new Array<RegExpValue>(
+        const regexes = new Array<RegExpValue>(
             { // 123456,  －１２３４５６
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.NumbersSpecialsChars, "gi"),
                 value: "IntegerNum"
@@ -121,7 +120,7 @@ export class ChineseDoubleExtractor extends BaseNumberExtractor {
     constructor() {
         super();
 
-        let regexes = new Array<RegExpValue>(
+        this.regexes = new Array<RegExpValue>(
             {
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.DoubleSpecialsChars, "gis"),
                 value: "DoubleNum"
@@ -130,7 +129,7 @@ export class ChineseDoubleExtractor extends BaseNumberExtractor {
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.DoubleSpecialsCharsWithNegatives, "gis"),
                 value: "DoubleNum"
             },
-            { // (-).2 
+            { // (-).2
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.SimpleDoubleSpecialsChars, "gis"),
                 value: "DoubleNum"
             },
@@ -155,8 +154,6 @@ export class ChineseDoubleExtractor extends BaseNumberExtractor {
                 value: "DoublePow"
             }
         );
-
-        this.regexes = regexes;
     }
 }
 
@@ -167,12 +164,12 @@ export class ChineseFractionExtractor extends BaseNumberExtractor {
     constructor() {
         super();
 
-        let regexes = new Array<RegExpValue>(
+        this.regexes = new Array<RegExpValue>(
             { // -4 5/2, ４ ６／３
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.FractionNotationSpecialsCharsRegex, "gis"),
                 value: "FracNum"
             },
-            { // 8/3 
+            { // 8/3
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.FractionNotationRegex, "gis"),
                 value: "FracNum"
             },
@@ -181,8 +178,6 @@ export class ChineseFractionExtractor extends BaseNumberExtractor {
                 value: "Frac" + ChineseNumeric.LangMarker
             }
         );
-
-        this.regexes = regexes;
     }
 }
 
@@ -191,7 +186,7 @@ export class ChineseOrdinalExtractor extends BaseNumberExtractor {
 
     constructor() {
         super();
-        let regexes = new Array<RegExpValue>(
+        this.regexes = new Array<RegExpValue>(
             { // 第一百五十四
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.OrdinalRegex, "gi"),
                 value: "Ordinal" + ChineseNumeric.LangMarker
@@ -201,8 +196,6 @@ export class ChineseOrdinalExtractor extends BaseNumberExtractor {
                 value: "Ordinal" + ChineseNumeric.LangMarker
             }
         );
-
-        this.regexes = regexes;
     }
 }
 
@@ -211,7 +204,7 @@ export class ChinesePercentageExtractor extends BaseNumberExtractor {
 
     constructor() {
         super();
-        let regexes = new Array<RegExpValue>(
+        this.regexes = new Array<RegExpValue>(
             { // 二十个百分点,  四点五个百分点
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.PercentagePointRegex, "gi"),
                 value: "Per" + ChineseNumeric.LangMarker
@@ -228,7 +221,7 @@ export class ChinesePercentageExtractor extends BaseNumberExtractor {
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.NumbersPercentageWithSeparatorRegex, "gis"),
                 value: "PerNum"
             },
-            { // 百分之3.2 k 
+            { // 百分之3.2 k
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.NumbersPercentageWithMultiplierRegex, "gi"),
                 value: "PerNum"
             },
@@ -248,7 +241,7 @@ export class ChinesePercentageExtractor extends BaseNumberExtractor {
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.SimpleNumbersPercentageRegex, "gis"),
                 value: "PerNum"
             },
-            { // 百分之15k 
+            { // 百分之15k
                 regExp: RegExpUtility.getSafeRegExp(ChineseNumeric.SimpleNumbersPercentageWithMultiplierRegex, "gi"),
                 value: "PerNum"
             },
@@ -301,7 +294,5 @@ export class ChinesePercentageExtractor extends BaseNumberExtractor {
                 value: "PerSpe"
             }
         );
-
-        this.regexes = regexes;
     }
 }

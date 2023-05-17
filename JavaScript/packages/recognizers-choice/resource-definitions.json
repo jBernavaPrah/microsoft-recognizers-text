@@ -64,6 +64,14 @@
                 "export namespace SpanishChoice {"
             ],
             "footer": [ "}" ]
+        },
+        {
+            "input": [ "Italian", "Italian-Choice" ],
+            "output": "italianChoice",
+            "header": [
+                "export namespace ItalianChoice {"
+            ],
+            "footer": [ "}" ]
         }
     ]
 }

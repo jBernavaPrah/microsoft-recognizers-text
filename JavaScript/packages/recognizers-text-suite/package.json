@@ -13,10 +13,6 @@
     "numex",
     "parser-library"
   ],
-  "main": "dist/recognizers-text-suite.umd.js",
-  "module": "dist/recognizers-text-suite.es5.js",
-  "typings": "dist/types/recognizers-text-suite.d.ts",
-  "browser": "dist/recognizers-text-suite.browser.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/Recognizers-Text"
@@ -27,12 +23,24 @@
   "engines": {
     "node": ">=10.3.0"
   },
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm5/index.js",
+  "es2015": "dist/esm2015/index.js",
+  "types": "dist/types/index.d.ts",
+  "browser": "dist/browser/index.js",
+  "sideEffects": false,
+  "files": ["dist"],
   "scripts": {
-    "clean-build": "rimraf dist && rimraf compiled",
-    "prepare": "npm run clean-build && tsc && rollup -c"
+    "prebuild": "rimraf dist",
+    "build": "tsc -b tsconfig.build.cjs.json tsconfig.build.esm5.json tsconfig.build.esm2015.json tsconfig.build.types.json",
+    "watch": "tsc -b tsconfig.build.cjs.json tsconfig.build.esm5.json tsconfig.build.esm2015.json tsconfig.build.types.json --watch",
+    "prettier": "prettier -w -l src test package.json",
+    "eslint": "eslint src test --fix --ext .ts",
+    "rimraf": "rimraf dist",
+    "test": "jest --runInBand"
   },
   "dependencies": {
-    "@microsoft/recognizers-text-data-types-timex-expression": "~1.3.0",
+
     "@microsoft/recognizers-text": "~1.3.0",
     "@microsoft/recognizers-text-number": "~1.3.0",
     "@microsoft/recognizers-text-number-with-unit": "~1.3.0",

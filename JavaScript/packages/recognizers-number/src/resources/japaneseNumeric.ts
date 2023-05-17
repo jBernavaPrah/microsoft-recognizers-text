@@ -135,7 +135,7 @@ export namespace JapaneseNumeric {
     export const TwoNumberRangeRegex3 = `(${OneNumberRangeLessRegex1}|${OneNumberRangeLessRegex3}|${OneNumberRangeLessRegex4})\\s*(と|((と)?同時に)|((と)?そして)|が|,)?\\s*(${OneNumberRangeMoreRegex1}|${OneNumberRangeMoreRegex3}|${OneNumberRangeMoreRegex4})`;
     export const TwoNumberRangeRegex4 = `(?<number1>((?!((,(?!\\d+))|。)).)+)\\s*${TillRegex}\\s*(?<number2>((?!((,(?!\\d+))|。)).)+)`;
     export const AmbiguousFractionConnectorsRegex = `^[.]`;
-    export const RelativeReferenceOffsetMap: ReadonlyMap<string, string> = new Map<string, string>([["前", ""],["現在", ""],["次", ""],["最後", ""],["最後から三番目", ""],["最後から二番目", ""],["最後から一つ前", ""],["最後から一つ前のもの", ""],["最後から一つ前のこと", ""],["最後から1つ前のこと", ""],["最後から1つ前のもの", ""],["最後から1つ前", ""],["現在のこと", ""],["前のもの", ""],["次のもの", ""],["最後から3番目", ""],["最後から2番目", ""]]);
+    export const RelativeReferenceOffsetMap: ReadonlyMap<string, string> = new Map<string, string>([["前", "-1"],["現在", "0"],["次", "1"],["最後", "0"],["最後から三番目", "-2"],["最後から二番目", "-1"],["最後から一つ前", "-1"],["最後から一つ前のもの", "-1"],["最後から一つ前のこと", "-1"],["最後から1つ前のこと", "-1"],["最後から1つ前のもの", "-1"],["最後から1つ前", "-1"],["現在のこと", "0"],["前のもの", "-1"],["次のもの", "1"],["最後から3番目", "-2"],["最後から2番目", "-1"]]);
     export const RelativeReferenceRelativeToMap: ReadonlyMap<string, string> = new Map<string, string>([["前", "current"],["現在", "current"],["次", "current"],["最後", "end"],["最後から三番目", "end"],["最後から二番目", "end"],["最後から一つ前", "end"],["最後から一つ前のもの", "end"],["最後から一つ前のこと", "end"],["現在のこと", "current"],["最後から1つ前のこと", "end"],["最後から1つ前のもの", "end"],["最後から1つ前", "end"],["前のもの", "current"],["次のもの", "current"],["最後から3番目", "end"],["最後から2番目", "end"]]);
     export const AmbiguityFiltersDict: ReadonlyMap<string, string> = new Map<string, string>([["^に$", "に"]]);
 }

@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { IExtractor, ExtractResult, IParser, ParseResult, StringUtility } from "@microsoft/recognizers-text";
-import { CultureInfo, Constants as NumberConstants } from "@microsoft/recognizers-text-number";
-import last = require("lodash.last");
-import { Constants } from "./constants";
-import { DictionaryUtils } from "./utilities";
-import { BaseCurrency } from "../resources/baseCurrency";
+import { IExtractor, ExtractResult, IParser, ParseResult, StringUtility } from '@microsoft/recognizers-text';
+import { CultureInfo, Constants as NumberConstants } from '@microsoft/recognizers-text-number';
+import last from 'lodash.last';
+import { Constants } from './constants';
+import { DictionaryUtils } from './utilities';
+import { BaseCurrency } from '../resources/baseCurrency';
 
 export class UnitValue {
-    public number: string = "";
-    public unit: string = "";
+    public number: string = '';
+    public unit: string = '';
 }
 
 export class UnitValueIso extends UnitValue {
-    public isoCurrency: string = "";
+    public isoCurrency: string = '';
 }
 
 export interface INumberWithUnitParserConfiguration {
@@ -22,11 +22,12 @@ export interface INumberWithUnitParserConfiguration {
     readonly cultureInfo: CultureInfo;
     readonly internalNumberParser: IParser;
     readonly internalNumberExtractor: IExtractor;
-    readonly connectorToken: string;
+    readonly connectorToken: string | null;
     readonly currencyNameToIsoCodeMap: ReadonlyMap<string, string>;
     readonly currencyFractionCodeList: ReadonlyMap<string, string>;
     readonly currencyFractionNumMap: ReadonlyMap<string, number>;
     readonly currencyFractionMapping: ReadonlyMap<string, string>;
+
     BindDictionary(dictionary: Map<string, string>): void;
 }
 
@@ -35,13 +36,13 @@ export abstract class BaseNumberWithUnitParserConfiguration implements INumberWi
     cultureInfo: CultureInfo;
     abstract internalNumberParser: IParser;
     abstract internalNumberExtractor: IExtractor;
-    abstract connectorToken: string;
+    abstract connectorToken: string | null;
     abstract currencyNameToIsoCodeMap: ReadonlyMap<string, string>;
     abstract currencyFractionCodeList: ReadonlyMap<string, string>;
     readonly currencyFractionNumMap: ReadonlyMap<string, number>;
     readonly currencyFractionMapping: ReadonlyMap<string, string>;
 
-    constructor(cultureInfo: CultureInfo) {
+    protected constructor(cultureInfo: CultureInfo) {
         this.cultureInfo = cultureInfo;
         this.unitMap = new Map<string, string>();
         this.currencyFractionNumMap = BaseCurrency.CurrencyFractionalRatios;
@@ -61,31 +62,31 @@ export class NumberWithUnitParser implements IParser {
     }
 
     parse(extResult: ExtractResult): ParseResult {
-        let ret = new ParseResult(extResult);
+        const ret = new ParseResult(extResult);
         let numberResult: ExtractResult;
-        let halfResult: ExtractResult;
+        let halfResult: ExtractResult | null;
         if (extResult.data && extResult.data instanceof Array && extResult.data.length === 2) {
             numberResult = extResult.data[0];
             halfResult = extResult.data[1];
         }
-        else if (extResult.data && typeof extResult.data === "object") {
+        else if (extResult.data && typeof extResult.data === 'object') {
             numberResult = extResult.data as ExtractResult;
             halfResult = null;
         }
         else if (extResult.type === Constants.SYS_NUM) {
-            ret.value = this.config.internalNumberParser.parse(extResult).value;
+            ret.value = this.config.internalNumberParser.parse(extResult)!.value;
             return ret;
         }
         else {
             // if there is no unitResult, means there is just unit
-            numberResult = { start: -1, length: 0, text: null, type: null };
+            numberResult = { start: -1, length: 0, text: '', type: '' };
             halfResult = null;
         }
 
         // key contains units
-        let key = extResult.text;
+        const key = extResult.text;
         let unitKeyBuild = '';
-        let unitKeys = new Array<string>();
+        const unitKeys = new Array<string>();
         for (let i = 0; i <= key.length; i++) {
             if (i === key.length) {
                 if (unitKeyBuild.length !== 0) {
@@ -100,7 +101,7 @@ export class NumberWithUnitParser implements IParser {
                     unitKeyBuild = '';
                 }
 
-                let o = numberResult.start + numberResult.length - 1;
+                const o = numberResult.start + numberResult.length - 1;
                 if (o !== null && !isNaN(o)) {
                     i = o;
                 }
@@ -111,7 +112,7 @@ export class NumberWithUnitParser implements IParser {
         }
 
         /* Unit type depends on last unit in suffix.*/
-        let lastUnit = last(unitKeys);
+        let lastUnit = last(unitKeys)!;
         if (halfResult != null) {
             lastUnit = lastUnit.substring(0, lastUnit.length - halfResult.text.length);
         }
@@ -134,11 +135,11 @@ export class NumberWithUnitParser implements IParser {
             }
 
             if (unitValue) {
-                let numValue = numberResult.text && numberResult.text.length ? this.config.internalNumberParser.parse(numberResult) : null;
+                const numValue = numberResult.text && numberResult.text.length ? this.config.internalNumberParser.parse(numberResult) : null;
                 let resolutionStr = numValue ? numValue.resolutionStr : null;
                 if (halfResult != null) {
-                    let halfValue = this.config.internalNumberParser.parse(halfResult);
-                    resolutionStr += halfValue.resolutionStr.substring(1);
+                    const halfValue = this.config.internalNumberParser.parse(halfResult)!;
+                    resolutionStr += halfValue.resolutionStr!.substring(1);
                 }
                 ret.value = { number: resolutionStr, unit: unitValue } as UnitValue;
                 ret.resolutionStr = (`${resolutionStr} ${unitValue}`).trim();
@@ -156,18 +157,18 @@ export class NumberWithUnitParser implements IParser {
         }
     }
 
-    private deleteBracketsIfExisted(unit: string) { 
+    private deleteBracketsIfExisted(unit: string): string {
         let hasBrackets = false;
 
-        if (unit.startsWith('(') && unit.endsWith(')')) { 
+        if (unit.startsWith('(') && unit.endsWith(')')) {
             hasBrackets = true;
         }
 
-        if (unit.startsWith('[') && unit.endsWith(']')) { 
+        if (unit.startsWith('[') && unit.endsWith(']')) {
             hasBrackets = true;
         }
 
-        if (unit.startsWith('{') && unit.endsWith('}')) { 
+        if (unit.startsWith('{') && unit.endsWith('}')) {
             hasBrackets = true;
         }
 
@@ -175,8 +176,8 @@ export class NumberWithUnitParser implements IParser {
             hasBrackets = true;
         }
 
-        if (hasBrackets) { 
-            unit = unit.substr(1, unit.length - 2)
+        if (hasBrackets) {
+            unit = unit.substring(1, unit.length - 2);
         }
 
         return unit;
@@ -194,25 +195,25 @@ export class BaseCurrencyParser implements IParser {
     }
 
     public parse(extResult: ExtractResult): ParseResult {
-        let result: ParseResult = null;
+        let result: ParseResult | null = null;
 
         if (extResult.data instanceof Array) {
             result = this.mergeCompoundUnit(extResult);
         }
         else {
             result = this.numberWithUnitParser.parse(extResult);
-            let value: UnitValue = result.value;
-            if (!this.config.currencyNameToIsoCodeMap.has(value.unit) || this.config.currencyNameToIsoCodeMap.get(value.unit).startsWith(Constants.FAKE_ISO_CODE_PREFIX)) {
+            const value: UnitValue = result.value;
+            if (!this.config.currencyNameToIsoCodeMap.has(value.unit) || this.config.currencyNameToIsoCodeMap.get(value.unit)!.startsWith(Constants.FAKE_ISO_CODE_PREFIX)) {
                 result.value = {
                     unit: value.unit,
-                    number: value.number
+                    number: value.number,
                 } as UnitValue;
             }
             else {
                 result.value = {
                     unit: value.unit,
                     number: value.number,
-                    isoCurrency: this.config.currencyNameToIsoCodeMap.get(value.unit)
+                    isoCurrency: this.config.currencyNameToIsoCodeMap.get(value.unit),
                 } as UnitValueIso;
             }
         }
@@ -220,21 +221,21 @@ export class BaseCurrencyParser implements IParser {
     }
 
     private mergeCompoundUnit(compoundResult: ExtractResult): ParseResult {
-        let results: ParseResult[] = [];
-        let compoundUnit: ParseResult[] = compoundResult.data;
+        const results: ParseResult[] = [];
+        const compoundUnit: ParseResult[] = compoundResult.data;
 
         let count = 0;
-        let result: ParseResult = null;
+        let result: ParseResult | null = null;
         let numberValue = null;
-        let mainUnitValue = '';
+        let mainUnitValue: string | null = '';
         let mainUnitIsoCode = '';
         let fractionUnitsString = '';
 
         for (let i = 0; i < compoundUnit.length; i++) {
-            let extractResult = compoundUnit[i];
-            let parseResult = this.numberWithUnitParser.parse(extractResult);
-            let parseResultValue: UnitValue = parseResult.value;
-            let unitValue = parseResultValue != null ? parseResultValue.unit : null;
+            const extractResult = compoundUnit[i];
+            const parseResult = this.numberWithUnitParser.parse(extractResult);
+            const parseResultValue: UnitValue = parseResult.value;
+            const unitValue = parseResultValue != null ? parseResultValue.unit : null;
 
             // Process a new group
             if (count === 0) {
@@ -251,15 +252,15 @@ export class BaseCurrencyParser implements IParser {
                 }
                 result.resolutionStr = parseResult.resolutionStr;
 
-                if (this.config.currencyNameToIsoCodeMap.has(unitValue)) {
-                    mainUnitIsoCode = this.config.currencyNameToIsoCodeMap.get(unitValue);
+                if (this.config.currencyNameToIsoCodeMap.has(unitValue!)) {
+                    mainUnitIsoCode = this.config.currencyNameToIsoCodeMap.get(unitValue!)!;
                 }
 
                 // If the main unit can't be recognized, finish process this group.
                 if (StringUtility.isNullOrEmpty(mainUnitIsoCode)) {
                     result.value = {
-                        number: numberValue.toString(),
-                        unit: mainUnitValue
+                        number: numberValue!.toString(),
+                        unit: mainUnitValue,
                     } as UnitValue;
 
                     results.push(result);
@@ -268,39 +269,39 @@ export class BaseCurrencyParser implements IParser {
                 }
 
                 if (this.config.currencyFractionMapping.has(mainUnitIsoCode)) {
-                    fractionUnitsString = this.config.currencyFractionMapping.get(mainUnitIsoCode);
+                    fractionUnitsString = this.config.currencyFractionMapping.get(mainUnitIsoCode)!;
                 }
             }
             else {
                 // Match pure number as fraction unit.
                 if (extractResult.type === NumberConstants.SYS_NUM) {
-                    numberValue += parseResult.value * (1.0 / 100);
-                    result.resolutionStr += ' ' + parseResult.resolutionStr;
-                    result.length = parseResult.start + parseResult.length - result.start;
+                    numberValue! += parseResult.value * (1.0 / 100);
+                    result!.resolutionStr += ' ' + parseResult.resolutionStr;
+                    result!.length = parseResult.start + parseResult.length - result!.start;
                     count++;
                     continue;
                 }
 
-                let fractionUnitCode: string;
-                let fractionNumValue: number;
+                let fractionUnitCode: string | null = null;
+                let fractionNumValue: number | null = null;
 
-                if (this.config.currencyFractionCodeList.has(unitValue)) {
-                    fractionUnitCode = this.config.currencyFractionCodeList.get(unitValue);
+                if (this.config.currencyFractionCodeList.has(unitValue!)) {
+                    fractionUnitCode = this.config.currencyFractionCodeList.get(unitValue!)!;
                 }
 
-                if (this.config.currencyFractionNumMap.has(unitValue)) {
-                    fractionNumValue = this.config.currencyFractionNumMap.get(unitValue);
+                if (this.config.currencyFractionNumMap.has(unitValue!)) {
+                    fractionNumValue = this.config.currencyFractionNumMap.get(unitValue!)!;
                 }
 
                 if (fractionUnitCode && fractionNumValue !== 0 && this.checkUnitsStringContains(fractionUnitCode, fractionUnitsString)) {
-                    numberValue += parseFloat(parseResultValue.number) * (1.0 / fractionNumValue);
-                    result.resolutionStr += ' ' + parseResult.resolutionStr;
-                    result.length = parseResult.start + parseResult.length - result.start;
+                    numberValue! += parseFloat(parseResultValue.number) * (1.0 / fractionNumValue!);
+                    result!.resolutionStr += ' ' + parseResult.resolutionStr;
+                    result!.length = parseResult.start + parseResult.length - result!.start;
                 }
                 else {
                     // If the fraction unit doesn't match the main unit, finish process this group.
                     if (result !== null) {
-                        result = this.createCurrencyResult(result, mainUnitIsoCode, numberValue, mainUnitValue);
+                        result = this.createCurrencyResult(result, mainUnitIsoCode, numberValue!, mainUnitValue!);
                         results.push(result);
                         result = null;
                     }
@@ -316,7 +317,7 @@ export class BaseCurrencyParser implements IParser {
         }
 
         if (result !== null) {
-            result = this.createCurrencyResult(result, mainUnitIsoCode, numberValue, mainUnitValue);
+            result = this.createCurrencyResult(result, mainUnitIsoCode, numberValue!, mainUnitValue!);
             results.push(result);
         }
 
@@ -326,7 +327,7 @@ export class BaseCurrencyParser implements IParser {
     }
 
     private checkUnitsStringContains(fractionUnitCode: string, fractionUnitsString: string): boolean {
-        let unitsMap = new Map<string, string>();
+        const unitsMap = new Map<string, string>();
         DictionaryUtils.bindUnitsString(unitsMap, '', fractionUnitsString);
 
         return unitsMap.has(fractionUnitCode);
@@ -340,18 +341,18 @@ export class BaseCurrencyParser implements IParser {
         });
     }
 
-    private createCurrencyResult(result: ParseResult, mainUnitIsoCode: string, numberValue: number, mainUnitValue: string): ParseResult{
+    private createCurrencyResult(result: ParseResult, mainUnitIsoCode: string, numberValue: number, mainUnitValue: string): ParseResult {
         if (StringUtility.isNullOrEmpty(mainUnitIsoCode) || mainUnitIsoCode.startsWith(Constants.FAKE_ISO_CODE_PREFIX)) {
             result.value = {
                 number: numberValue ? numberValue.toString() : 'null',
-                unit: mainUnitValue
+                unit: mainUnitValue,
             } as UnitValue;
         }
         else {
             result.value = {
                 number: numberValue ? numberValue.toString() : 'null',
                 unit: mainUnitValue,
-                isoCurrency: mainUnitIsoCode
+                isoCurrency: mainUnitIsoCode,
             } as UnitValueIso;
         }
 
