@@ -16,7 +16,6 @@ import { BaseSetExtractor, BaseSetParser } from './baseSet';
 import { BaseDurationExtractor, BaseDurationParser } from './baseDuration';
 import { BaseHolidayExtractor, BaseHolidayParser } from './baseHoliday';
 import isEqual from 'lodash.isequal';
-import { DateTimeOptions } from './dateTimeRecognizer';
 
 export interface IMergedExtractorConfiguration {
     dateExtractor: IDateTimeExtractor;
@@ -41,6 +40,13 @@ export interface IMergedExtractorConfiguration {
     unspecificDatePeriodRegex: RegExp;
     filterWordRegexList: RegExp[];
     AmbiguityFiltersDict: Map<RegExp, RegExp>;
+}
+
+export enum DateTimeOptions {
+    None = 0,
+    SkipFromToMerge = 1,
+    SplitDateAndTime = 2,
+    Calendar = 4
 }
 
 export class BaseMergedExtractor implements IDateTimeExtractor {

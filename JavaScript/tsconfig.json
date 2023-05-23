@@ -1,12 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2019",
     "module": "commonjs",
-    "lib": ["es2017"],
-    "declaration": true,
+    "lib": [
+      "es6"
+    ],
     "sourceMap": true,
     "strict": true,
     "noEmit": true,
+    "declaration": false,
+    "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -16,5 +19,8 @@
     "forceConsistentCasingInFileNames": true,
     "useUnknownInCatchVariables": false
   },
-  "exclude": ["node_modules", "dist"]
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

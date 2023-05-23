@@ -114,11 +114,11 @@ export class ItalianIntegerExtractor extends BaseNumberExtractor {
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.AllIntRegexWithLocks, "gis"),
-                value: "IntegerEng"
+                value: "IntegerIta"
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.AllIntRegexWithDozenSuffixLocks, "gis"),
-                value: "IntegerEng"
+                value: "IntegerIta"
             }
         );
     }
@@ -157,7 +157,7 @@ export class ItalianDoubleExtractor extends BaseNumberExtractor {
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.DoubleAllFloatRegex, "gis"),
-                value: "DoubleEng"
+                value: "DoubleIta"
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.DoubleExponentialNotationRegex, "gis"),
@@ -189,11 +189,11 @@ export class ItalianFractionExtractor extends BaseNumberExtractor {
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.FractionNounRegex, "gis"),
-                value: "FracEng"
+                value: "FracIta"
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.FractionNounWithArticleRegex, "gis"),
-                value: "FracEng"
+                value: "FracIta"
             }
         );
 
@@ -201,7 +201,7 @@ export class ItalianFractionExtractor extends BaseNumberExtractor {
         if (mode != NumberMode.Unit) {
             regexes.push({
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.FractionPrepositionRegex, "gis"),
-                value: "FracEng"
+                value: "FracIta"
                 });
         };
 
@@ -225,11 +225,11 @@ export class ItalianOrdinalExtractor extends BaseNumberExtractor {
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.OrdinalItalianRegex, "gis"),
-                value: "OrdEng"
+                value: "OrdIta"
             },
             {
                 regExp: RegExpUtility.getSafeRegExp(ItalianNumeric.OrdinalRoundNumberRegex, "gis"),
-                value: "OrdEng"
+                value: "OrdIta"
             }
         );
     }

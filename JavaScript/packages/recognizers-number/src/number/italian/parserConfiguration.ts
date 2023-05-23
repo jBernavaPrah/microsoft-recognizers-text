@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { ParseResult } from "@microsoft/recognizers-text";
-import { INumberParserConfiguration } from "../parsers";
-import { CultureInfo, Culture } from "../../culture";
-import { ItalianNumeric } from "../../resources/italianNumeric";
-import { RegExpUtility } from "@microsoft/recognizers-text";
+import { ParseResult } from '@microsoft/recognizers-text';
+import { INumberParserConfiguration } from '../parsers';
+import { CultureInfo, Culture } from '../../culture';
+import { ItalianNumeric } from '../../resources/italianNumeric';
+import { RegExpUtility } from '@microsoft/recognizers-text';
 
 export class ItalianNumberParserConfiguration implements INumberParserConfiguration {
 
@@ -26,6 +26,7 @@ export class ItalianNumberParserConfiguration implements INumberParserConfigurat
     readonly writtenGroupSeparatorTexts: readonly string[];
     readonly writtenIntegerSeparatorTexts: readonly string[];
     readonly writtenFractionSeparatorTexts: readonly string[];
+    readonly roundMultiplierRegex: RegExp;
 
     constructor(ci?: CultureInfo) {
         if (!ci) {
@@ -41,6 +42,8 @@ export class ItalianNumberParserConfiguration implements INumberParserConfigurat
         this.halfADozenText = ItalianNumeric.HalfADozenText;
         this.wordSeparatorToken = ItalianNumeric.WordSeparatorToken;
 
+        this.roundMultiplierRegex = RegExpUtility.getSafeRegExp(ItalianNumeric.RoundMultiplierRegex, 'gis');
+
         this.writtenDecimalSeparatorTexts = ItalianNumeric.WrittenDecimalSeparatorTexts;
         this.writtenGroupSeparatorTexts = ItalianNumeric.WrittenGroupSeparatorTexts;
         this.writtenIntegerSeparatorTexts = ItalianNumeric.WrittenIntegerSeparatorTexts;
@@ -49,9 +52,9 @@ export class ItalianNumberParserConfiguration implements INumberParserConfigurat
         this.cardinalNumberMap = ItalianNumeric.CardinalNumberMap;
         this.ordinalNumberMap = ItalianNumeric.OrdinalNumberMap;
         this.roundNumberMap = ItalianNumeric.RoundNumberMap;
-        this.negativeNumberSignRegex = RegExpUtility.getSafeRegExp(ItalianNumeric.NegativeNumberSignRegex, "is");
-        this.halfADozenRegex = RegExpUtility.getSafeRegExp(ItalianNumeric.HalfADozenRegex, "gis");
-        this.digitalNumberRegex = RegExpUtility.getSafeRegExp(ItalianNumeric.DigitalNumberRegex, "gis");
+        this.negativeNumberSignRegex = RegExpUtility.getSafeRegExp(ItalianNumeric.NegativeNumberSignRegex, 'is');
+        this.halfADozenRegex = RegExpUtility.getSafeRegExp(ItalianNumeric.HalfADozenRegex, 'gis');
+        this.digitalNumberRegex = RegExpUtility.getSafeRegExp(ItalianNumeric.DigitalNumberRegex, 'gis');
     }
 
     normalizeTokenSet(tokens: readonly string[], context: ParseResult): readonly string[] {
@@ -59,8 +62,8 @@ export class ItalianNumberParserConfiguration implements INumberParserConfigurat
         const tokenList = Array.from(tokens);
         const tokenLen = tokenList.length;
         for (let i = 0; i < tokenLen; i++) {
-            if (tokenList[i].includes("-")) {
-                const spiltedTokens = tokenList[i].split("-");
+            if (tokenList[i].includes('-')) {
+                const spiltedTokens = tokenList[i].split('-');
                 if (spiltedTokens.length === 2 && this.ordinalNumberMap.has(spiltedTokens[1])) {
                     fracWords.push(spiltedTokens[0]);
                     fracWords.push(spiltedTokens[1]);
@@ -69,7 +72,7 @@ export class ItalianNumberParserConfiguration implements INumberParserConfigurat
                     fracWords.push(tokenList[i]);
                 }
             }
-            else if ((i < tokenLen - 2) && tokenList[i + 1] === "-") {
+            else if ((i < tokenLen - 2) && tokenList[i + 1] === '-') {
                 if (this.ordinalNumberMap.has(tokenList[i + 2])) {
                     fracWords.push(tokenList[i]);
                     fracWords.push(tokenList[i + 2]);
@@ -88,7 +91,7 @@ export class ItalianNumberParserConfiguration implements INumberParserConfigurat
     }
 
     resolveCompositeNumber(numberStr: string): number {
-        if (numberStr.includes("-")) {
+        if (numberStr.includes('-')) {
             const numbers = numberStr.split('-');
             let ret = 0;
             numbers.forEach(num => {
@@ -113,4 +116,5 @@ export class ItalianNumberParserConfiguration implements INumberParserConfigurat
 
         return 0;
     }
+
 }

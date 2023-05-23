@@ -50,10 +50,10 @@ export class Culture {
         }
 
         cultureCode = cultureCode.toLowerCase();
-        let supportedCultureCodes = Culture.getSupportedCultureCodes();
+        const supportedCultureCodes = Culture.getSupportedCultureCodes();
 
         if (supportedCultureCodes.indexOf(cultureCode) < 0) {
-            let culturePrefix = cultureCode.split('-')[0].trim();
+            const culturePrefix = cultureCode.split('-')[0].trim();
 
             supportedCultureCodes.forEach(function(supportedCultureCode) {
                 if (supportedCultureCode.startsWith(culturePrefix)) {

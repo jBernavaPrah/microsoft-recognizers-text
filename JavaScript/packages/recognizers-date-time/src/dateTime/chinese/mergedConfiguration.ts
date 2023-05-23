@@ -23,11 +23,12 @@ import { ChineseDatePeriodExtractor, ChineseDatePeriodParser } from "./datePerio
 import { ChineseDateTimePeriodExtractor, ChineseDateTimePeriodParser } from "./dateTimePeriodConfiguration";
 import { ChineseSetExtractor, ChineseSetParser } from "./setConfiguration";
 import { ChineseHolidayExtractorConfiguration, ChineseHolidayParser } from "./holidayConfiguration";
-import { DateTimeOptions } from "../dateTimeRecognizer";
 import { IDateTimeParser, DateTimeParseResult } from "../parsers";
 import { Constants, TimeTypeConstants } from "../constants";
 import { DateTimeFormatUtil, DateUtils, DateTimeResolutionResult, StringMap } from "../utilities";
 import isEqual from 'lodash.isequal';
+
+import { DateTimeOptions } from './baseMerged'
 
 class ChineseMergedExtractorConfiguration implements IMergedExtractorConfiguration {
     readonly dateExtractor: BaseDateExtractor

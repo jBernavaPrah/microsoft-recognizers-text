@@ -17,6 +17,8 @@ export class JapaneseNumberParserConfiguration implements ICJKNumberParserConfig
     readonly fractionMarkerToken: string;
     readonly halfADozenRegex: RegExp | null;
     readonly halfADozenText: string;
+
+    readonly roundMultiplierRegex: RegExp|null|undefined;
     readonly langMarker: string;
     readonly nonDecimalSeparatorChar: string;
     readonly decimalSeparatorChar: string;

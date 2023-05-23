@@ -16,6 +16,7 @@ export class EnglishNumberParserConfiguration implements INumberParserConfigurat
     readonly digitalNumberRegex: RegExp;
     readonly fractionMarkerToken: string;
     readonly negativeNumberSignRegex: RegExp;
+    readonly roundMultiplierRegex: RegExp|null|undefined;
     readonly halfADozenRegex: RegExp;
     readonly halfADozenText: string;
     readonly langMarker: string;

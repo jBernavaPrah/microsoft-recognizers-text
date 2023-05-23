@@ -4,7 +4,7 @@
 import { IParser, ParseResult, ExtractResult } from '@microsoft/recognizers-text';
 import { CultureInfo } from '../culture';
 import trimEnd from 'lodash.trimend';
-import sortBy from  'lodash.sortby';
+import sortBy from 'lodash.sortby';
 import { RegExpUtility } from '@microsoft/recognizers-text';
 import { BigNumber } from 'bignumber.js';
 
@@ -19,6 +19,7 @@ export interface INumberParserConfiguration {
     readonly digitalNumberRegex: RegExp;
     readonly fractionMarkerToken: string;
     readonly negativeNumberSignRegex: RegExp;
+    readonly roundMultiplierRegex: RegExp | undefined | null;
     readonly halfADozenRegex: RegExp | null;
     readonly halfADozenText: string;
     readonly langMarker: string;
@@ -133,7 +134,7 @@ export class BaseNumberParser implements IParser {
             length: extResult.length,
             text: extResult.text,
             type: extResult.type,
-            metaData: null
+            metaData: null,
         };
 
         // [1] 24
@@ -189,7 +190,7 @@ export class BaseNumberParser implements IParser {
                 type: extResult.type,
             } as ParseResult;
 
-        const resultText = extResult.text.toLowerCase();
+        let resultText = extResult.text.toLowerCase();
         if (resultText.includes(this.config.fractionMarkerToken)) {
             const overIndex = resultText.indexOf(this.config.fractionMarkerToken);
             const smallPart = resultText.substring(0, overIndex).trim();
@@ -206,6 +207,29 @@ export class BaseNumberParser implements IParser {
             result.value = smallValue / bigValue;
         }
         else {
+
+
+            let is_fraction_multiplier = false;
+            let multiplier = 1;
+            if (this.config.roundMultiplierRegex) {
+                const match = this.config.roundMultiplierRegex.exec(resultText);
+                if (match) {
+                    resultText = resultText.replace(match[0], '');
+                    multiplier = this.config.roundNumberMap.get(match?.groups?.mutiplier ?? '') ?? 1;
+                    if (match?.groups?.fracMultiplier) {
+                        is_fraction_multiplier = true;
+                    }
+
+                }
+            }
+
+            //     match = self.config.round_multiplier_regex.search(result_text)
+            // if match is not None:
+            //     result_text = result_text.replace(match.group(0), "")
+            // multiplier = self.config.round_number_map[match.group("multiplier")]
+            // is_fraction_multiplier = True if match.group("fracMultiplier") is not None else False
+
+
             const words = resultText.split(' ').filter(s => s && s.length);
             const fracWords = Array.from(this.config.normalizeTokenSet(words, result));
 

@@ -15,6 +15,8 @@ export class ChineseNumberParserConfiguration implements ICJKNumberParserConfigu
     readonly cultureInfo: CultureInfo;
     readonly digitalNumberRegex: RegExp;
     readonly fractionMarkerToken: string;
+
+    readonly roundMultiplierRegex: RegExp|null|undefined;
     readonly halfADozenRegex: RegExp | null;
     readonly halfADozenText: string;
     readonly langMarker: string;

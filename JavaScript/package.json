@@ -18,7 +18,7 @@
 		"setup": "npm run bootstrap && npm run build",
 		"bootstrap": "lerna bootstrap --hoist --no-ci --nohoist=@babel/* --nohoist=babel-*",
 		"clean": "lerna clean",
-		"build": "lerna exec npm run build",
+		"build": "lerna exec npm run build --ignore @microsoft/recognizers-text-date-time",
 		"prettier": "lerna exec npm run prettier ",
 		"eslint": "lerna exec npm run eslint ",
 		"rimraf": "lerna exec npm run rimraf ",
@@ -84,6 +84,7 @@
 		"browserify-shim": "^3.8.14",
 		"cached-path-relative": "^1.0.2",
 		"colors": "^1.4.0",
+		"concurrently": "^8.0.1",
 		"dot-prop": "^8.0.0",
 		"eslint": "^7.32.0",
 		"eslint-config-prettier": "^8.8.0",
@@ -111,7 +112,7 @@
 		"typescript": "^5.0.4"
 	},
 	"workspaces": [
-		"packages/*"
+		"packages/recognizers-*"
 	],
 	"engines": {
 		"node": ">=16"

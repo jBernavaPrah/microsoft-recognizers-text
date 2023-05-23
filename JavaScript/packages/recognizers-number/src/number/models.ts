@@ -89,8 +89,8 @@ export abstract class AbstractNumberModel implements IModel {
         }
 
         return parseNums
-            .map(o => o as ParseResult)
-            .map(o => ({
+            .filter((x): x is ParseResult => x !== null)
+            .map((o) => ({
                 start: o.start,
                 end: o.start + o.length - 1,
                 resolution: { value: o.resolutionStr },

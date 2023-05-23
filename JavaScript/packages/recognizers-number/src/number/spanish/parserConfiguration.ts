@@ -15,6 +15,8 @@ export class SpanishNumberParserConfiguration implements INumberParserConfigurat
     readonly cultureInfo: CultureInfo;
     readonly digitalNumberRegex: RegExp;
     readonly fractionMarkerToken: string;
+
+    readonly roundMultiplierRegex: RegExp|null|undefined;
     readonly negativeNumberSignRegex: RegExp;
     readonly halfADozenRegex: RegExp;
     readonly halfADozenText: string;

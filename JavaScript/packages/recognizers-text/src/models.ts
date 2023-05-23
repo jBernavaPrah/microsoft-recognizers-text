@@ -79,14 +79,14 @@ export class ModelFactory<TModelOptions> {
         model?: IModel
     } {
         culture = Culture.mapToNearestLanguage(culture);
-        let cacheResult = this.getModelFromCache(modelTypeName, culture, options);
+        const cacheResult = this.getModelFromCache(modelTypeName, culture, options);
         if (cacheResult) {
             return {containsModel: true, model: cacheResult};
         }
 
-        let key = this.generateKey(modelTypeName, culture);
+        const key = this.generateKey(modelTypeName, culture);
         if (this.modelFactories.has(key)) {
-            let model = this.modelFactories.get(key)!(options);
+            const model = this.modelFactories.get(key)!(options);
             this.registerModelInCache(modelTypeName, culture, options, model);
             return {containsModel: true, model: model};
         }
@@ -94,8 +94,8 @@ export class ModelFactory<TModelOptions> {
         return {containsModel: false};
     }
 
-    registerModel(modelTypeName: string, culture: string, modelCreator: (options: TModelOptions) => IModel) {
-        let key = this.generateKey(modelTypeName, culture);
+    registerModel(modelTypeName: string, culture: string, modelCreator: (options: TModelOptions) => IModel):void {
+        const key = this.generateKey(modelTypeName, culture);
         if (this.modelFactories.has(key)) {
             throw new Error(`${culture}-${modelTypeName} has already been registered.`);
         }
@@ -103,9 +103,9 @@ export class ModelFactory<TModelOptions> {
         this.modelFactories.set(key, modelCreator);
     }
 
-    initializeModels(targetCulture: string, options: TModelOptions) {
+    initializeModels(targetCulture: string, options: TModelOptions):void {
         this.modelFactories.forEach((value, key) => {
-            let modelFactoryKey = ModelFactoryKey.fromString<TModelOptions>(key);
+            const modelFactoryKey = ModelFactoryKey.fromString<TModelOptions>(key);
             if (StringUtility.isNullOrEmpty(targetCulture) || modelFactoryKey.culture === targetCulture) {
                 this.tryGetModel(modelFactoryKey.modelType, (modelFactoryKey.culture as string), modelFactoryKey.options!);
             }
@@ -117,12 +117,12 @@ export class ModelFactory<TModelOptions> {
     }
 
     private getModelFromCache(modelTypeName: string, culture: string, options: TModelOptions): IModel | undefined {
-        let key = this.generateCacheKey(modelTypeName, culture, options);
+        const key = this.generateCacheKey(modelTypeName, culture, options);
         return ModelFactory.cache.get(key);
     }
 
-    private registerModelInCache(modelTypeName: string, culture: string, options: TModelOptions, model: IModel) {
-        let key = this.generateCacheKey(modelTypeName, culture, options);
+    private registerModelInCache(modelTypeName: string, culture: string, options: TModelOptions, model: IModel):void {
+        const key = this.generateCacheKey(modelTypeName, culture, options);
         ModelFactory.cache.set(key, model);
     }
 

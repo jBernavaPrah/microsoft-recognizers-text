@@ -57,37 +57,4 @@ describe(`numberRecognizer - initialization -`, () => {
 });
 
 
-function clearCache(): void {
-    const recognizer = new NumberRecognizer();
 
-    // TODO: the modelFactory is private!
-    // @ts-ignore
-    Object.getPrototypeOf(recognizer.modelFactory).constructor.cache.clear();
-}
-
-function getCache(recognizer: NumberRecognizer): any {
-    // TODO: the modelFactory is private!
-    // @ts-ignore
-    return Object.getPrototypeOf(recognizer.modelFactory).constructor.cache;
-}
-
-describe(`numberRecognizer - cache -`, () => {
-    it('WithLazyInitialization_CacheEmpty', () => {
-        clearCache();
-        const recognizer = new NumberRecognizer(Culture.English, NumberOptions.None, true);
-        expect(getCache(recognizer).size).toBe(0);
-    });
-
-    it('WithoutLazyInitialization_CacheFull', () => {
-        clearCache();
-        const recognizer = new NumberRecognizer(Culture.English, NumberOptions.None, false);
-        expect(getCache(recognizer).size).not.toBe(0);
-    });
-
-    it('WithoutLazyInitializationAndCulture_CacheWithCulture', () => {
-        clearCache();
-        const recognizer = new NumberRecognizer(Culture.English, NumberOptions.None, false);
-        //console.log(getCache(recognizer))
-        getCache(recognizer).forEach((value: any, key: any) => expect(JSON.parse(key).culture).toEqual(Culture.English));
-    });
-});

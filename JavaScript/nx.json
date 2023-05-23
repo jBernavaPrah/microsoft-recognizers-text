@@ -1,0 +1,39 @@
+{
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": [
+          "prebuild",
+          "build",
+          "eslint",
+          "rimraf",
+          "test"
+        ]
+      }
+    }
+  },
+  "targetDefaults": {
+    "prebuild": {
+      "dependsOn": [
+        "^prebuild"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ]
+    },
+    "build": {
+      "dependsOn": [
+        "^build"
+      ],
+      "outputs": [
+        "{projectRoot}/dist"
+      ]
+    },
+    "test": {
+      "dependsOn": [
+        "^test"
+      ]
+    }
+  }
+}

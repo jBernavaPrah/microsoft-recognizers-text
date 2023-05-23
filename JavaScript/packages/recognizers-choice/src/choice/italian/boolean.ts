@@ -3,7 +3,7 @@
 
 import { RegExpUtility } from "@microsoft/recognizers-text";
 import { IBooleanExtractorConfiguration } from "../extractors";
-import { GermanChoice } from "../../resources/germanChoice";
+import { ItalianChoice } from "../../resources/italianChoice";
 
 export class ItalianBooleanExtractorConfiguration implements IBooleanExtractorConfiguration {
     readonly regexTrue: RegExp;
@@ -13,10 +13,10 @@ export class ItalianBooleanExtractorConfiguration implements IBooleanExtractorCo
     readonly onlyTopMatch: boolean;
 
     constructor(onlyTopMatch: boolean = true) {
-        this.emojiSkinToneRegex = RegExpUtility.getSafeRegExp(GermanChoice.SkinToneRegex);
-        this.regexTrue = RegExpUtility.getSafeRegExp(GermanChoice.TrueRegex);
-        this.regexFalse = RegExpUtility.getSafeRegExp(GermanChoice.FalseRegex);
-        this.tokenRegex = RegExpUtility.getSafeRegExp(GermanChoice.TokenizerRegex, 'is');
+        this.emojiSkinToneRegex = RegExpUtility.getSafeRegExp(ItalianChoice.SkinToneRegex);
+        this.regexTrue = RegExpUtility.getSafeRegExp(ItalianChoice.TrueRegex);
+        this.regexFalse = RegExpUtility.getSafeRegExp(ItalianChoice.FalseRegex);
+        this.tokenRegex = RegExpUtility.getSafeRegExp(ItalianChoice.TokenizerRegex, 'is');
         this.onlyTopMatch = onlyTopMatch;
     }
 }
